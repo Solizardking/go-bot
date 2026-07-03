@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	dnaPkg "github.com/8bitlabs/clawdbot/pkg/dna"
@@ -36,6 +37,7 @@ type Config struct {
 	// ClawdBot-specific
 	Solana   SolanaConfig   `json:"solana"`
 	Vulcan   VulcanConfig   `json:"vulcan"`
+	ClawdCode ClawdCodeConfig `json:"clawd_code"`
 	OODA     OODAConfig     `json:"ooda"`
 	Supabase SupabaseConfig `json:"supabase"`
 	Strategy StrategyConfig `json:"strategy"`
@@ -194,6 +196,21 @@ type VulcanConfig struct {
 	TimeoutSeconds       int     `json:"timeout_seconds"`
 }
 
+// ── ClawdBot: Clawd Code GLM-5.2 sidecar ─────────────────────────────
+
+type ClawdCodeConfig struct {
+	Dir             string `json:"dir"`
+	Binary          string `json:"binary"`
+	Entry           string `json:"entry"`
+	Provider        string `json:"provider"`
+	Model           string `json:"model"`
+	Mode            string `json:"mode"`
+	Stream          bool   `json:"stream"`
+	Thinking        string `json:"thinking"`
+	ReasoningEffort string `json:"reasoning_effort"`
+	TimeoutSeconds  int    `json:"timeout_seconds"`
+}
+
 // ── ClawdBot: OODA Loop ──────────────────────────────────────────────
 
 type OODAConfig struct {
@@ -288,6 +305,18 @@ func DefaultConfig() *Config {
 			MaxExposureRatio:     2,
 			TimeoutSeconds:       30,
 		},
+		ClawdCode: ClawdCodeConfig{
+			Dir:             DefaultClawdCodeDir(),
+			Binary:          "node",
+			Entry:           "dist/cli.js",
+			Provider:        "zai",
+			Model:           "glm-5.2",
+			Mode:            "code",
+			Stream:          false,
+			Thinking:        "enabled",
+			ReasoningEffort: "max",
+			TimeoutSeconds:  600,
+		},
 		OODA: OODAConfig{
 			Enabled:          true,
 			IntervalSeconds:  60,
@@ -334,6 +363,14 @@ func DefaultConfigPath() string {
 
 func DefaultWorkspacePath() string {
 	return filepath.Join(DefaultHome(), "workspace")
+}
+
+func DefaultClawdCodeDir() string {
+	home, _ := os.UserHomeDir()
+	if home == "" {
+		return "clawd-code"
+	}
+	return filepath.Join(home, "clawd-code")
 }
 
 // ── Load / Save ──────────────────────────────────────────────────────
@@ -566,10 +603,55 @@ func applyEnvOverrides(cfg *Config) {
 			cfg.Vulcan.TimeoutSeconds = n
 		}
 	}
+	if v := os.Getenv("CLAWDBOT_CLAWD_CODE_DIR"); v != "" {
+		cfg.ClawdCode.Dir = v
+	}
+	if v := os.Getenv("CLAWDBOT_CLAWD_CODE_BINARY"); v != "" {
+		cfg.ClawdCode.Binary = v
+	}
+	if v := os.Getenv("CLAWDBOT_CLAWD_CODE_ENTRY"); v != "" {
+		cfg.ClawdCode.Entry = v
+	}
+	if v := os.Getenv("CLAWDBOT_CLAWD_CODE_PROVIDER"); v != "" {
+		cfg.ClawdCode.Provider = v
+	}
+	if v := os.Getenv("CLAWDBOT_CLAWD_CODE_MODEL"); v != "" {
+		cfg.ClawdCode.Model = v
+	}
+	if v := os.Getenv("CLAWDBOT_CLAWD_CODE_MODE"); v != "" {
+		cfg.ClawdCode.Mode = v
+	}
+	if v := os.Getenv("CLAWDBOT_CLAWD_CODE_STREAM"); v != "" {
+		if stream, ok := parseEnvBool(v); ok {
+			cfg.ClawdCode.Stream = stream
+		}
+	}
+	if v := os.Getenv("CLAWDBOT_CLAWD_CODE_THINKING"); v != "" {
+		cfg.ClawdCode.Thinking = v
+	}
+	if v := os.Getenv("CLAWDBOT_CLAWD_CODE_REASONING_EFFORT"); v != "" {
+		cfg.ClawdCode.ReasoningEffort = v
+	}
+	if v := os.Getenv("CLAWDBOT_CLAWD_CODE_TIMEOUT_SECONDS"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			cfg.ClawdCode.TimeoutSeconds = n
+		}
+	}
 	// ClawdBot install ID — used for RPC auth header
 	if v := os.Getenv("CLAWDBOT_INSTALL_ID"); v != "" {
 		// stored for use by Solana RPC client as X-ClawdBot-Id header
 		_ = v
+	}
+}
+
+func parseEnvBool(value string) (bool, bool) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "1", "true", "yes", "y", "on":
+		return true, true
+	case "0", "false", "no", "n", "off":
+		return false, true
+	default:
+		return false, false
 	}
 }
 

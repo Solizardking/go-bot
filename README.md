@@ -13,9 +13,9 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![License](https://img.shields.io/badge/License-MIT-9945FF?style=for-the-badge)](LICENSE)
 
-**Solana-first · beats Zero on footprint · 79 Go source files · 44 Go packages · 23,795 Go lines · 3 binaries**
+**Solana-first · beats Zero on footprint · 81 Go source files · 45 Go packages · 24,166 Go lines · 3 binaries**
 
-<sub><strong>0.52 MB</strong> source archive · <strong>3.86 MiB</strong> working source · <strong>9.97 MB</strong> stripped CLI · Grok-first runtime · GLM-5.2 model surface</sub>
+<sub><strong>0.57 MB</strong> source archive · <strong>2.06 MiB</strong> exportable source · <strong>9.97 MB</strong> stripped CLI · Grok-first runtime · GLM-5.2 model surface</sub>
 
 [Quick Start](#-quick-start) · [Architecture](#-architecture) · [The Six Laws](#-the-six-law-harness) · [CLI Reference](#-cli-reference) · [Security](SECURITY.md) · [Release](docs/OPEN_SOURCE_RELEASE.md)
 
@@ -289,19 +289,20 @@ That mismatch is intentional for now. The codebase keeps the legacy module path 
 
 The target is to beat `/Users/8bit/Downloads/zero-main` on shipped source size
 while keeping the Solana-native runtime, ZK surface, web console, and catalog
-mapping intact. The 4.20 MB target applies to source and catalog payloads; it
-does not apply to the stripped native binary, which is a separate release asset.
+mapping intact. The 4.20 MB target applies to exported source archives, filtered
+source, generated-aware checkout source, and catalog payloads; it does not apply
+to the stripped native binary, which is a separate release asset.
 
 | Measurement | ClawdBot Go | Zero main | Result |
 |:---|---:|---:|:---|
-| Export archive | `517,325` bytes (`0.49 MiB`) | `2,241,592` bytes (`2.14 MiB`) | ClawdBot archive is ~4.3x smaller |
-| Exportable raw source set | `2,157,698` bytes (`2.06 MiB`) | `8,798,782` bytes (`8.39 MiB`) | ClawdBot source is ~4.1x smaller |
-| Checked working source set | `4,049,111` bytes (`3.86 MiB`) | `8,798,782` bytes (`8.39 MiB`) | ClawdBot stays under 4.20 MB decimal |
+| Export archive | `566,495` bytes (`0.54 MiB`) | `2,241,592` bytes (`2.14 MiB`) | ClawdBot archive is ~4.0x smaller |
+| Exportable raw source set | `2,160,393` bytes (`2.06 MiB`) | `8,798,782` bytes (`8.39 MiB`) | ClawdBot source is ~4.1x smaller |
+| Generated-aware checkout source | `4,059,425` bytes (`3.87 MiB`) | `8,798,782` bytes (`8.39 MiB`) | ClawdBot stays under 4.20 MB decimal |
 | Catalog pack dry run | `4,022,286` bytes (`3.84 MiB`) from `10,797,567` bytes | n/a | Fits under 4.20 MB with 62.7% savings |
-| Stripped CLI binary | `9,968,242` bytes (`9.51 MiB`) | `23,251,490` bytes (`22.17 MiB`) | ClawdBot binary is ~2.3x smaller |
-| Go source files | `79` | `974` | ClawdBot has ~92% fewer Go files |
-| Go packages | `44` | `88` | ClawdBot has half the package count |
-| Go lines | `23,795` | `252,444` | ClawdBot has ~91% fewer Go lines |
+| Stripped CLI binary | `9,968,386` bytes (`9.51 MiB`) | `23,251,490` bytes (`22.17 MiB`) | ClawdBot binary is ~2.3x smaller |
+| Go source files | `81` | `974` | ClawdBot has ~92% fewer Go files |
+| Go packages | `45` | `88` | ClawdBot has about half the package count |
+| Go lines | `24,166` | `252,444` | ClawdBot has ~90% fewer Go lines |
 
 An uncompressed native CLI under 4.20 MB would require a separate lite build
 profile that removes feature families or an external binary packer; the current
@@ -312,8 +313,10 @@ Source archives are kept small by excluding local/generated payload from repo
 exports: `.cache/`, `.agents/`, `agent/`, `build/`, checked-in binaries,
 generated UI screenshots, Node build outputs, `node_modules`, compiled `dist/`
 output, TypeScript build info, package lockfiles, local env files, and
-secret-looking key material. The install path rebuilds or reseeds those pieces
-instead of shipping them inside the Go source package.
+secret-looking key material. The generated-aware checkout source measurement
+keeps reproducibility locks and screenshots visible but still excludes installed
+dependencies and compiled outputs. The install path rebuilds or reseeds those
+pieces instead of shipping them inside the Go source package.
 
 For a default Go install, the required payload is the Go source, docs,
 `README.md`, `install.sh`, `go.mod`, `go.sum`, and runtime config examples. For
@@ -323,17 +326,19 @@ after the Go binary is installed.
 
 ### Repository Map
 
-Sizes are `du -sk` working-tree blocks for the requested top-level surfaces.
-Archive treatment follows `.gitattributes`, `.gitignore`, `.dockerignore`, and
-the catalog pack filters in `pkg/catalog/compress.go`.
+Sizes are clean source blocks for the requested top-level surfaces. Local
+dependency installs and compiled outputs such as `node_modules`, `dist`, and
+`target` are excluded from package budgets. Archive treatment follows
+`.gitattributes`, `.gitignore`, `.dockerignore`, and the catalog pack filters in
+`pkg/catalog/compress.go`.
 
 | Surface | Size | Role | Archive treatment |
 |:---|---:|:---|:---|
 | `cloudflare/` | `8 KiB` | Branded installer Worker and DNS checklist | Included |
 | `cmd/` | `124 KiB` | CLI, TUI, hardware commands | Included |
-| `docs/` | `28 KiB` | Go runtime, TEE, release notes | Included |
+| `docs/` | `36 KiB` | Go runtime, TEE, release notes | Included |
 | `ooda/` | `128 KiB` | TypeScript OODA loop prototype and journal harness | Included |
-| `pkg/` | `684 KiB` | 41 Go runtime packages, 19,062 Go lines | Included |
+| `pkg/` | `700 KiB` | 42 Go runtime packages, 19,433 Go lines | Included |
 | `scripts/` | `56 KiB` | Launcher and Upstash Box install surface | Included |
 | `ui/` | `2,780 KiB` | Lit/Vite control UI and ClawdBrowser app | Included; lockfiles and screenshots export-ignored |
 | `web/` | `140 KiB` | Go web backend plus React frontend shell | Included; built `dist/` export-ignored |
@@ -397,7 +402,7 @@ clawdbot-go/
 │   │   └── hardware.go          I2C sensor commands (scan/test/monitor/demo)
 │   └── clawdbot-tui/             TUI launcher (tcell/tview)
 │
-├── pkg/                         ── 41 Packages, 19,062 Go lines ──
+├── pkg/                         ── 42 Packages, 19,433 Go lines ──
 │   │
 │   │  ┌─ Core Agent ────────────────────────────────────────┐
 │   ├── agent/                   OODA loop, hooks, tool executor, prompts
@@ -796,11 +801,12 @@ ssh user@orin-nano './clawdbot ooda --hw-bus 1 --interval 60'
 
 | Metric | Value |
 |:-------|:------|
-| Go source files | 79 |
-| Go package directories | 44 total, 41 under `pkg/` |
-| Total Go lines | 23,795 |
-| Source export tarball | 517,325 bytes / 0.52 MB |
-| Exportable raw source set | 2,157,698 bytes / 2.16 MB |
+| Go source files | 81 |
+| Go package directories | 45 total, 42 under `pkg/` |
+| Total Go lines | 24,166 |
+| Source export tarball | 566,495 bytes / 0.57 MB |
+| Exportable raw source set | 2,160,393 bytes / 2.16 MB |
+| Generated-aware checkout source | 4,059,425 bytes / 4.06 MB |
 | CLI commands | 60+ |
 | Birdeye API methods | 22 |
 | Birdeye agent tools | 19 |
@@ -809,7 +815,7 @@ ssh user@orin-nano './clawdbot ooda --hw-bus 1 --interval 60'
 | Agent constitution documents | 7 (CONSTITUTION, six-laws, CLAWD, AGENTS, IDENTITY, SOUL, three-laws) |
 | Build targets | 8 platforms |
 | Binaries | `clawdbot`, `clawdbot-tui`, `clawdbot-web` |
-| Stripped CLI binary | 9,968,242 bytes / 9.97 MB |
+| Stripped CLI binary | 9,968,386 bytes / 9.97 MB |
 | Runtime RAM | < 10 MB |
 | Boot time | < 1 second |
 | Default runtime model provider | xAI Grok (`grok-4.3`) |

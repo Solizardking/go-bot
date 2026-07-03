@@ -5,7 +5,7 @@ package constants
 const (
 	AppName    = "ClawdBot"
 	AppVersion = "1.0.0"
-	AppTagline = "Sentient Solana Trading Intelligence"
+	AppTagline = "Sovereign Solana Trading Intelligence"
 
 	// Channel names
 	ChannelCLI       = "cli"

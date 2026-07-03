@@ -18,7 +18,7 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![License](https://img.shields.io/badge/License-MIT-9945FF?style=for-the-badge)](LICENSE)
 
-**Solana-first · 79 Go source files · 44 Go packages · 23,795 Go lines · 0.55 MB source archive · 9.97 MB stripped CLI · 3 binaries · Grok-first runtime · GLM-5.2 model surface**
+**Solana-first · 79 Go source files · 44 Go packages · 23,795 Go lines · 0.58 MB source archive · 9.97 MB stripped CLI · 3 binaries · Grok-first runtime · GLM-5.2 model surface**
 
 [Quick Start](#-quick-start) · [Architecture](#-architecture) · [The Six Laws](#-the-six-law-harness) · [CLI Reference](#-cli-reference) · [Security](SECURITY.md) · [Release](docs/OPEN_SOURCE_RELEASE.md)
 
@@ -297,11 +297,19 @@ does not apply to the stripped native binary, which is a separate release asset.
 
 | Measurement | ClawdBot Go | Zero main | Result |
 |:---|---:|---:|:---|
-| Export archive | `553,888` bytes (`0.53 MiB`) | `2,241,592` bytes (`2.14 MiB`) | ClawdBot archive is ~4.0x smaller |
-| Exportable raw source set | `2,151,317` bytes (`2.05 MiB`) | `8,798,782` bytes (`8.39 MiB`) | ClawdBot source is ~4.1x smaller |
-| Checked working source set | `4,038,347` bytes (`3.85 MiB`) | `8,798,782` bytes (`8.39 MiB`) | ClawdBot stays under 4.20 MB decimal |
+| Export archive | `579,498` bytes (`0.55 MiB`) | `2,241,592` bytes (`2.14 MiB`) | ClawdBot archive is ~3.9x smaller |
+| Exportable raw source set | `2,153,549` bytes (`2.05 MiB`) | `8,798,782` bytes (`8.39 MiB`) | ClawdBot source is ~4.1x smaller |
+| Checked working source set | `4,044,962` bytes (`3.86 MiB`) | `8,798,782` bytes (`8.39 MiB`) | ClawdBot stays under 4.20 MB decimal |
 | Catalog pack dry run | `4,022,286` bytes (`3.84 MiB`) from `10,797,567` bytes | n/a | Fits under 4.20 MB with 62.7% savings |
-| Stripped CLI binary | `9,968,242` bytes (`9.51 MiB`) | not measured | Binary target is not the 4.20 MB source target |
+| Stripped CLI binary | `9,968,242` bytes (`9.51 MiB`) | `23,251,490` bytes (`22.17 MiB`) | ClawdBot binary is ~2.3x smaller |
+| Go source files | `79` | `974` | ClawdBot has ~92% fewer Go files |
+| Go packages | `44` | `88` | ClawdBot has half the package count |
+| Go lines | `23,795` | `252,444` | ClawdBot has ~91% fewer Go lines |
+
+An uncompressed native CLI under 4.20 MB would require a separate lite build
+profile that removes feature families or an external binary packer; the current
+release-grade stripped CLI stays under 10 MB and is still materially smaller
+than Zero's stripped CLI.
 
 Source archives are kept small by excluding local/generated payload from repo
 exports: `.cache/`, `.agents/`, `agent/`, `build/`, checked-in binaries,
@@ -348,7 +356,7 @@ the catalog pack filters in `pkg/catalog/compress.go`.
 | `LICENSE` | `4 KiB` | MIT license | Included |
 | `Makefile` | `12 KiB` | Build, verify, release commands | Included |
 | `program.md` | `4 KiB` | Research program overview | Included |
-| `README.md` | `36 KiB` | Runtime overview and package map | Included |
+| `README.md` | `44 KiB` | Runtime overview and package map | Included |
 | `schema.sql` | `12 KiB` | Supabase schema | Included |
 | `SECURITY.md` | `4 KiB` | Security posture | Included |
 | `six-laws.md` | `4 KiB` | Canonical six-law harness | Included |
@@ -791,11 +799,11 @@ ssh user@orin-nano './clawdbot ooda --hw-bus 1 --interval 60'
 
 | Metric | Value |
 |:-------|:------|
-| Go source files | 72 |
-| Go package directories | 43 total, 41 under `pkg/` |
+| Go source files | 79 |
+| Go package directories | 44 total, 41 under `pkg/` |
 | Total Go lines | 23,795 |
-| Export archive | 553,888 bytes before this README refresh; see Slim Package Target |
-| Exportable raw source set | 2,151,317 bytes before this README refresh; below 4.20 MB target |
+| Export archive | 579,498 bytes / 0.58 MB |
+| Exportable raw source set | 2,153,549 bytes / 2.15 MB |
 | CLI commands | 60+ |
 | Birdeye API methods | 22 |
 | Birdeye agent tools | 19 |
@@ -804,6 +812,7 @@ ssh user@orin-nano './clawdbot ooda --hw-bus 1 --interval 60'
 | Agent constitution documents | 7 (CONSTITUTION, six-laws, CLAWD, AGENTS, IDENTITY, SOUL, three-laws) |
 | Build targets | 8 platforms |
 | Binaries | `clawdbot`, `clawdbot-tui`, `clawdbot-web` |
+| Stripped CLI binary | 9,968,242 bytes / 9.97 MB |
 | Runtime RAM | < 10 MB |
 | Boot time | < 1 second |
 | Default runtime model provider | xAI Grok (`grok-4.3`) |

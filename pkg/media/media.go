@@ -1,5 +1,5 @@
 // Package media provides media file lifecycle management for ClawdBot.
-// Adapted from PicoClaw — stores, resolves, and releases media refs.
+// ClawdBot Go media refs — stores, resolves, and releases media refs.
 package media
 
 import (

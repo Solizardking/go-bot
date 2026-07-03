@@ -1,5 +1,5 @@
 // Package voice provides audio transcription for ClawdBot.
-// Adapted from PicoClaw — supports Whisper API for voice input.
+// ClawdBot Go voice input with Whisper API support.
 package voice
 
 import (

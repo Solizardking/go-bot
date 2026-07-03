@@ -1,5 +1,5 @@
 // ClawdBot Go — Ultra-lightweight Solana Trading Intelligence
-// Adapted from PicoClaw architecture for NVIDIA Orin Nano deployment.
+// ClawdBot Go architecture for NVIDIA Orin Nano deployment.
 // Public runtime repo: see pkg/config.RuntimeRepoURL
 // Public ecosystem hub: see pkg/config.HubRepoURL
 // License: MIT
@@ -94,7 +94,7 @@ func NewClawdBotCommand() *cobra.Command {
 		Use:   "clawdbot",
 		Short: short,
 		Long: `ClawdBot Go — Ultra-lightweight autonomous trading agent for Solana.
-Powered by the PicoClaw Go runtime, adapted for NVIDIA Orin Nano hardware.
+Powered by the ClawdBot Go runtime, tuned for NVIDIA Orin Nano hardware.
 
 Features:
   • OODA Loop (Observe → Orient → Decide → Act)

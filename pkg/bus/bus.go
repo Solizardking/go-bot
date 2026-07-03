@@ -1,5 +1,5 @@
 // Package bus provides the message bus for ClawdBot inter-component communication.
-// Adapted from PicoClaw's bus package — channels publish inbound, agent consumes.
+// ClawdBot Go bus package — channels publish inbound, agent consumes.
 package bus
 
 import (

@@ -1,5 +1,5 @@
 // Package devices provides device/sensor management for ClawdBot.
-// Adapted from PicoClaw — I2C device registry for Arduino Modulino sensors.
+// ClawdBot Go I2C device registry for Arduino Modulino sensors.
 package devices
 
 import (

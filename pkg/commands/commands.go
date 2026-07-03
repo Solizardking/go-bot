@@ -1,5 +1,5 @@
 // Package commands provides the chat command registry for ClawdBot.
-// Adapted from PicoClaw — slash commands dispatched from chat input.
+// ClawdBot Go slash commands dispatched from chat input.
 package commands
 
 import "context"

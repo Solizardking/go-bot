@@ -1,5 +1,5 @@
 // Package skills provides skill discovery and installation for ClawdBot.
-// Adapted from PicoClaw — registry-based skill search and install.
+// ClawdBot Go registry-based skill search and install.
 package skills
 
 import (

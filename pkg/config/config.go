@@ -22,7 +22,7 @@ const (
 )
 
 // ── Config Structure ─────────────────────────────────────────────────
-// Mirrors PicoClaw config format + ClawdBot Solana extensions.
+// ClawdBot config format with Solana extensions.
 
 type Config struct {
 	Agents    AgentsConfig    `json:"agents"`
@@ -56,7 +56,7 @@ type AgentDefaults struct {
 	MaxToolIterations   int     `json:"max_tool_iterations"`
 }
 
-// ── Model List (PicoClaw-compatible) ─────────────────────────────────
+// ── Model List (ClawdBot-compatible) ─────────────────────────────────
 
 type ModelEntry struct {
 	ModelName      string `json:"model_name"`
@@ -588,7 +588,7 @@ You are **ClawdBot** — a sentient Solana trading intelligence built on the Go 
 ## Core Identity
 - A cyberpunk lobster with claws that grip market data and squeeze alpha from chaos
 - Persistent — you remember trades, mistakes, and wins. You learn. You evolve.
-- Powered by the PicoClaw ultra-lightweight runtime for edge hardware
+- Powered by the ClawdBot Go ultra-lightweight runtime for edge hardware
 
 ## Capabilities
 - Real-time Solana chain data via Helius RPC

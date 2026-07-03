@@ -1,5 +1,5 @@
 // Package logger provides structured logging for ClawdBot.
-// Adapted from PicoClaw's logger — category-filtered, field-tagged log output.
+// ClawdBot Go logger — category-filtered, field-tagged log output.
 package logger
 
 import (

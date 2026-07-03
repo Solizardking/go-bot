@@ -1,5 +1,5 @@
 // ClawdBot Web Console — web-based dashboard and agent control.
-// Adapted from PicoClaw's web launcher — serves embedded frontend,
+// ClawdBot Go web launcher — serves embedded frontend,
 // provides API for config management and gateway control.
 //
 // Usage:

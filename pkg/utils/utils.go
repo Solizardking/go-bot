@@ -1,5 +1,5 @@
 // Package utils provides shared utility functions for ClawdBot.
-// Adapted from PicoClaw's utils package.
+// ClawdBot Go shared utility functions.
 package utils
 
 import (

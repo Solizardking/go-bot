@@ -1,5 +1,5 @@
 // Package session manages chat session history for ClawdBot.
-// Adapted from PicoClaw — per-session message history with summarization trigger.
+// ClawdBot Go session history with summarization trigger.
 package session
 
 import (

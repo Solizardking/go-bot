@@ -1,5 +1,5 @@
 # ClawdBot Web — Makefile
-# Adapted from PicoClaw web/Makefile
+# ClawdBot Go web console Makefile
 
 .PHONY: all frontend backend clean dev
 

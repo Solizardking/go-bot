@@ -1,5 +1,5 @@
 // Package migrate provides config migration for ClawdBot.
-// Adapted from PicoClaw — version-based config file upgrades.
+// ClawdBot Go version-based config file upgrades.
 package migrate
 
 import (

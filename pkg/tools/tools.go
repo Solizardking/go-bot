@@ -1,5 +1,5 @@
 // Package tools provides the tool registry and built-in tools for ClawdBot.
-// Adapted from PicoClaw — web search, exec, file ops, message, spawn,
+// ClawdBot Go tool registry — web search, exec, file ops, message, spawn,
 // plus ClawdBot-specific Solana tools and hardware I2C tools.
 package tools
 

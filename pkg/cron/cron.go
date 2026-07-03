@@ -1,5 +1,5 @@
 // Package cron provides scheduled task execution for ClawdBot.
-// Adapted from PicoClaw — configurable cron jobs for OODA, research, heartbeat.
+// ClawdBot Go cron jobs for OODA, research, heartbeat.
 package cron
 
 import (

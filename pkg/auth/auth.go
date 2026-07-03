@@ -1,5 +1,5 @@
 // Package auth provides OAuth/token management for ClawdBot.
-// Adapted from PicoClaw — API key store, PKCE auth flow.
+// ClawdBot Go auth — API key store, PKCE auth flow.
 package auth
 
 import (

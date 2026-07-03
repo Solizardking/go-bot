@@ -1,5 +1,5 @@
 // Package channels provides the multi-channel gateway for ClawdBot.
-// Adapted from PicoClaw — supports Discord, Telegram, WebSocket, CLI.
+// ClawdBot Go channels — supports Discord, Telegram, WebSocket, CLI.
 package channels
 
 import (

@@ -1,5 +1,5 @@
 // Package routing resolves message routing for ClawdBot multi-agent setups.
-// Adapted from PicoClaw — route inputs to specific agents by channel/peer.
+// ClawdBot Go routing — route inputs to specific agents by channel/peer.
 package routing
 
 import "fmt"

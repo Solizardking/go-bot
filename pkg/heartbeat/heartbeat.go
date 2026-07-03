@@ -1,5 +1,5 @@
 // Package heartbeat provides periodic heartbeat messages for ClawdBot.
-// Adapted from PicoClaw — cron-triggered proactive notifications.
+// ClawdBot Go heartbeat — cron-triggered proactive notifications.
 package heartbeat
 
 import (

@@ -1,5 +1,5 @@
 // Package providers abstracts LLM providers for ClawdBot.
-// Adapted from PicoClaw — supports OpenRouter, Anthropic, OpenAI, Ollama.
+// ClawdBot Go providers — supports OpenRouter, Anthropic, OpenAI, Ollama.
 package providers
 
 import (

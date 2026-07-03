@@ -1,5 +1,5 @@
 // Package constants defines ClawdBot system constants.
-// Adapted from PicoClaw's constants package.
+// ClawdBot Go runtime constants.
 package constants
 
 const (

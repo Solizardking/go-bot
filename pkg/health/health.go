@@ -1,5 +1,5 @@
 // Package health provides system health checks for ClawdBot.
-// Adapted from PicoClaw — reports status of all connectors and subsystems.
+// ClawdBot Go health reports for connectors and subsystems.
 package health
 
 import (

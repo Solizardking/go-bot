@@ -1,5 +1,5 @@
 // Package identity provides sender identity resolution for ClawdBot.
-// Adapted from PicoClaw — canonical "platform:id" format with legacy compat.
+// ClawdBot Go identity — canonical "platform:id" format with legacy compat.
 package identity
 
 import (

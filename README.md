@@ -20,7 +20,7 @@
 
 **70 Go source files · 42 packages · 21,400+ lines · 3 binaries · <10MB RAM · Grok-first**
 
-[Quick Start](#-quick-start) · [Architecture](#-architecture) · [The Six Laws](#-the-six-law-harness) · [CLI Reference](#-cli-reference) · [Security](SECURITY.md) · [Release](OPEN_SOURCE_RELEASE.md)
+[Quick Start](#-quick-start) · [Architecture](#-architecture) · [The Six Laws](#-the-six-law-harness) · [CLI Reference](#-cli-reference) · [Security](SECURITY.md) · [Release](docs/OPEN_SOURCE_RELEASE.md)
 
 </div>
 
@@ -290,17 +290,22 @@ That mismatch is intentional for now. The codebase keeps the legacy module path 
 
 ### Slim Package Target
 
-The source archive is kept small by excluding local/generated payload from
-release archives: `.cache/`, `.agents/`, `agent/`, `build/`, checked-in
+The source archive is kept small by excluding local/generated payload from the
+repo and release archives: `.cache/`, `.agents/`, `agent/`, `build/`, checked-in
 binaries, generated UI screenshots, Node build outputs, `node_modules`, and
-lockfiles for optional TypeScript surfaces. The install path rebuilds or
-reseeds those pieces instead of shipping them inside the Go source package.
+compiled `dist/` output. The install path rebuilds or reseeds those pieces
+instead of shipping them inside the Go source package.
 
 For a default Go install, the required payload is the Go source, docs,
 `README.md`, `install.sh`, `go.mod`, `go.sum`, and runtime config examples. For
 a complete Solana tooling install, use `CLAWDBOT_INSTALL_COMPLETE=1` so the Node
 tooling, MCP config, and Vulcan/Phoenix CLI are fetched and built as sidecars
 after the Go binary is installed.
+
+The local catalog roots are external by default: `CLAWDBOT_SKILLS_DIR` points at
+`/Users/8bit/skills/skills` and `CLAWDBOT_AGENTS_DIR` points at
+`/Users/8bit/agents/agents/src`. Repo-local `.agents/` and `agent/` mirrors are
+developer caches, not required runtime source.
 
 ---
 
@@ -354,6 +359,7 @@ clawdbot-go/
 ├── IDENTITY.md                  Sovereign identity document
 ├── SOUL.md                      Inner character and trading philosophy
 ├── three-laws.md                Immutable on-chain laws (hash-attested)
+├── docs/                        Static release, Go runtime, and TEE notes
 │
 ├── zk-primitives/               ZK agent, TypeScript client, Anchor program
 │   ├── MANIFEST.json            Machine-readable subsystem index

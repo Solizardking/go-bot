@@ -177,7 +177,7 @@ audit: verify
 
 release-check: verify
 	@echo "📦 Checking tracked generated artifacts..."
-	@bad="$$(git ls-files -- .cache build dist clawdbot ':(glob)**/.next/**' ':(glob)**/target/**' ':(glob)**/*.tsbuildinfo' ':(glob)**/.vitest-attachments/**' ':(glob)**/__screenshots__/**')"; \
+	@bad="$$(git ls-files -- .agents agent .cache build dist clawdbot ':(glob)**/.DS_Store' ':(glob)**/.next/**' ':(glob)**/target/**' ':(glob)**/*.tsbuildinfo' ':(glob)**/.vitest-attachments/**' ':(glob)**/__screenshots__/**')"; \
 	if [ -n "$$bad" ]; then \
 		echo "generated artifacts are tracked and must be removed from git:"; \
 		echo "$$bad"; \

@@ -841,6 +841,9 @@ ZK primitives surface. It automatically skips regenerated or bulky payloads such
 as node_modules, dist, build, target, caches, screenshots, lockfiles for optional
 TypeScript surfaces, and secret-looking env/key files.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if !packIncludeSkills && !packIncludeAgents && !packIncludeZK {
+				return fmt.Errorf("enable at least one of --skills, --agents, or --zk")
+			}
 			r := report()
 			result, err := catalog.CompressReport(r, catalog.PackOptions{
 				OutputPath:    packOut,

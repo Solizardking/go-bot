@@ -23,8 +23,12 @@ build/** export-ignore
 **/target/** export-ignore
 *.tsbuildinfo export-ignore
 *.DS_Store export-ignore
+**/.env export-ignore
+**/.env.local export-ignore
+**/.env.*.local export-ignore
 dist/** export-ignore
 **/package-lock.json export-ignore
+**/pnpm-lock.yaml export-ignore
 web/frontend/dist/** export-ignore
 ui/.vitest-attachments/** export-ignore
 ui/src/**/__screenshots__/** export-ignore

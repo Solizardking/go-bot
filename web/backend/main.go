@@ -42,7 +42,7 @@ import (
 const banner = `
   ╔══════════════════════════════════════════════╗
   ║       🦞 ClawdBot OS — Web Console           ║
-  ║   Sentient Solana Trading Intelligence       ║
+  ║  Sovereign Solana Trading Intelligence       ║
   ╚══════════════════════════════════════════════╝`
 
 func main() {

@@ -28,7 +28,7 @@ const lobsterArt = `[#FF4060]
               ██████╗████████████████████████████╗
              ██╔═══████╔═══════════════════════████╗
             ██║   ████║  [#14F195]🦞 CLAWDBOT GO[#FF4060]           ████║
-           ██║   ████║  [#00D4FF]Sentient Solana Robot[#FF4060]    ████║
+           ██║   ████║  [#00D4FF]Sovereign Solana Runtime[#FF4060] ████║
           ██║   ████║  [#9945FF]NVIDIA Orin Nano[#FF4060]         ████║
          ██║   ████║  [#FFAA00]$CLAWD :: Droids Lead[#FF4060]    ████║
         ██║   ████╚═══════════════════════════████║

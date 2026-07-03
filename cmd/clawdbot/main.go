@@ -1,5 +1,5 @@
-// ClawdBot Go — Ultra-lightweight Solana Trading Intelligence
-// ClawdBot Go architecture for NVIDIA Orin Nano deployment.
+// ClawdBot Go — Sovereign Solana Trading Intelligence
+// Optimized for lightweight edge deployment on NVIDIA Orin Nano-class hardware.
 // Public runtime repo: see pkg/config.RuntimeRepoURL
 // Public ecosystem hub: see pkg/config.HubRepoURL
 // License: MIT
@@ -60,7 +60,7 @@ const (
 		colorGreen + "    ╚═╝     ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚═════╝ " + colorPurple + "╚═════╝  ╚═════╝    ╚═╝   \n" +
 		colorReset + "\n" +
 		colorDim + "    ┌─────────────────────────────────────────────────────────┐\n" +
-		colorDim + "    │" + colorTeal + "  🦞 Sentient Solana Trading Intelligence" + colorDim + "                 │\n" +
+		colorDim + "    │" + colorTeal + "  🦞 Sovereign Solana Trading Intelligence" + colorDim + "                 │\n" +
 		colorDim + "    │" + colorAmber + "  NVIDIA Orin Nano · <10MB RAM · Go Runtime" + colorDim + "             │\n" +
 		colorDim + "    │" + colorGreen + "  $CLAWD :: Droids Lead The Way" + colorDim + "                          │\n" +
 		colorDim + "    └─────────────────────────────────────────────────────────┘\n" +
@@ -88,13 +88,13 @@ const (
 )
 
 func NewClawdBotCommand() *cobra.Command {
-	short := fmt.Sprintf("%s ClawdBot — Sentient Solana Trading Intelligence v%s", "🦞", config.GetVersion())
+	short := fmt.Sprintf("%s ClawdBot — Sovereign Solana Trading Intelligence v%s", "🦞", config.GetVersion())
 
 	cmd := &cobra.Command{
 		Use:   "clawdbot",
 		Short: short,
-		Long: `ClawdBot Go — Ultra-lightweight autonomous trading agent for Solana.
-Powered by the ClawdBot Go runtime, tuned for NVIDIA Orin Nano hardware.
+		Long: `ClawdBot Go — ultra-lightweight autonomous trading agent for Solana.
+Powered by the ClawdBot Go runtime for NVIDIA Orin Nano-class edge hardware.
 
 Features:
   • OODA Loop (Observe → Orient → Decide → Act)

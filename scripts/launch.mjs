@@ -158,7 +158,7 @@ function animatedBoot() {
   return new Promise((resolve) => {
     const { frames, interval } = spinners.cascade;
     const bootLines = [
-      `${C.dim}    │${C.teal}  🦞 Sentient Solana Trading Intelligence${C.dim}                     │${C.reset}`,
+      `${C.dim}    │${C.teal}  🦞 Sovereign Solana Trading Intelligence${C.dim}                    │${C.reset}`,
       `${C.dim}    │${C.amber}  OODA Loop · ClawVault Memory · Birdeye Analytics${C.dim}            │${C.reset}`,
       `${C.dim}    │${C.purple}  Vulcan Phoenix Perps · Jupiter Swaps · Helius RPC${C.dim}            │${C.reset}`,
       `${C.dim}    │${C.green}  $CLAWD :: Droids Lead The Way${C.dim}                                 │${C.reset}`,

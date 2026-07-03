@@ -290,10 +290,24 @@ That mismatch is intentional for now. The codebase keeps the legacy module path 
 
 ### Slim Package Target
 
-The source archive is kept small by excluding local/generated payload from the
-repo and release archives: `.cache/`, `.agents/`, `agent/`, `build/`, checked-in
-binaries, generated UI screenshots, Node build outputs, `node_modules`, and
-compiled `dist/` output. The install path rebuilds or reseeds those pieces
+The target is to beat `/Users/8bit/Downloads/zero-main` on shipped source size
+while keeping the Solana-native runtime, ZK surface, web console, and catalog
+mapping intact. The 4.20 MB target applies to source and catalog payloads; it
+does not apply to the stripped native binary, which is a separate release asset.
+
+| Measurement | ClawdBot Go | Zero main | Result |
+|:---|---:|---:|:---|
+| Export archive | `553,888` bytes (`0.53 MiB`) | `2,241,592` bytes (`2.14 MiB`) | ClawdBot archive is ~4.0x smaller |
+| Exportable raw source set | `2,151,317` bytes (`2.05 MiB`) | `8,798,782` bytes (`8.39 MiB`) | ClawdBot source is ~4.1x smaller |
+| Checked working source set | `4,038,347` bytes (`3.85 MiB`) | `8,798,782` bytes (`8.39 MiB`) | ClawdBot stays under 4.20 MB decimal |
+| Catalog pack dry run | `4,022,286` bytes (`3.84 MiB`) from `10,797,567` bytes | n/a | Fits under 4.20 MB with 62.7% savings |
+| Stripped CLI binary | `9,968,242` bytes (`9.51 MiB`) | not measured | Binary target is not the 4.20 MB source target |
+
+Source archives are kept small by excluding local/generated payload from repo
+exports: `.cache/`, `.agents/`, `agent/`, `build/`, checked-in binaries,
+generated UI screenshots, Node build outputs, `node_modules`, compiled `dist/`
+output, TypeScript build info, package lockfiles, local env files, and
+secret-looking key material. The install path rebuilds or reseeds those pieces
 instead of shipping them inside the Go source package.
 
 For a default Go install, the required payload is the Go source, docs,
@@ -302,10 +316,68 @@ a complete Solana tooling install, use `CLAWDBOT_INSTALL_COMPLETE=1` so the Node
 tooling, MCP config, and Vulcan/Phoenix CLI are fetched and built as sidecars
 after the Go binary is installed.
 
-The local catalog roots are external by default: `CLAWDBOT_SKILLS_DIR` points at
-`/Users/8bit/skills/skills` and `CLAWDBOT_AGENTS_DIR` points at
-`/Users/8bit/agents/agents/src`. Repo-local `.agents/` and `agent/` mirrors are
-developer caches, not required runtime source.
+### Repository Map
+
+Sizes are `du -sk` working-tree blocks for the requested top-level surfaces.
+Archive treatment follows `.gitattributes`, `.gitignore`, `.dockerignore`, and
+the catalog pack filters in `pkg/catalog/compress.go`.
+
+| Surface | Size | Role | Archive treatment |
+|:---|---:|:---|:---|
+| `cloudflare/` | `8 KiB` | Branded installer Worker and DNS checklist | Included |
+| `cmd/` | `124 KiB` | CLI, TUI, hardware commands | Included |
+| `docs/` | `28 KiB` | Go runtime, TEE, release notes | Included |
+| `ooda/` | `128 KiB` | TypeScript OODA loop prototype and journal harness | Included |
+| `pkg/` | `684 KiB` | 41 Go runtime packages, 19,062 Go lines | Included |
+| `scripts/` | `56 KiB` | Launcher and Upstash Box install surface | Included |
+| `ui/` | `2,780 KiB` | Lit/Vite control UI and ClawdBrowser app | Included; lockfiles and screenshots export-ignored |
+| `web/` | `140 KiB` | Go web backend plus React frontend shell | Included; built `dist/` export-ignored |
+| `zk-primitives/` | `560 KiB` | ZK agent, TS client, configs, docs, Anchor program | Included; lockfiles, local env, `node_modules`, `dist`, `target` export-ignored |
+| `.dockerignore` | `4 KiB` | Docker build trimming | Included |
+| `.env.example` | `8 KiB` | Public runtime env template | Included |
+| `.gitattributes` | `4 KiB` | Linguist and source export rules | Included |
+| `.gitignore` | `4 KiB` | Local/generated file guardrails | Included |
+| `AGENTS.md` | `16 KiB` | Agent catalog and trust gates | Included |
+| `CLAWD.md` | `12 KiB` | Agent runtime context | Included |
+| `CONSTITUTION.md` | `16 KiB` | Clawd Constitution | Included |
+| `Dockerfile` | `4 KiB` | Multi-stage runtime container | Included |
+| `go.mod` | `4 KiB` | Legacy-compatible Go module path | Included |
+| `go.sum` | `16 KiB` | Go dependency checksums | Included |
+| `IDENTITY.md` | `8 KiB` | Sovereign identity document | Included |
+| `install.sh` | `28 KiB` | One-shot installer | Included |
+| `LICENSE` | `4 KiB` | MIT license | Included |
+| `Makefile` | `12 KiB` | Build, verify, release commands | Included |
+| `program.md` | `4 KiB` | Research program overview | Included |
+| `README.md` | `36 KiB` | Runtime overview and package map | Included |
+| `schema.sql` | `12 KiB` | Supabase schema | Included |
+| `SECURITY.md` | `4 KiB` | Security posture | Included |
+| `six-laws.md` | `4 KiB` | Canonical six-law harness | Included |
+| `skills-lock.json` | `36 KiB` | Seeded skill lock metadata | Included |
+| `SOUL.md` | `12 KiB` | Agent character and memory model | Included |
+| `start.sh` | `4 KiB` | Start wrapper | Included |
+| `strategy.md` | `4 KiB` | Trading strategy notes | Included |
+| `three-laws.md` | `4 KiB` | Immutable on-chain laws | Included |
+| `wrangler.toml` | `4 KiB` | Cloudflare Worker config | Included |
+
+### Catalog Mapping
+
+The local catalog roots are external by default:
+`CLAWDBOT_SKILLS_DIR=/Users/8bit/skills/skills`,
+`CLAWDBOT_AGENTS_DIR=/Users/8bit/agents/agents/src`, and
+`CLAWDBOT_ZK_PRIMITIVES_DIR=/Users/8bit/Agentics/clawdbot-go/zk-primitives`.
+In the current local view, `clawdbot catalog --json` indexes `192` skills,
+`88` agents, and `5` ZK operations.
+
+| Catalog input | Local root | Pack path | Notes |
+|:---|:---|:---|:---|
+| Skills | `/Users/8bit/skills/skills` | `skills/<slug>/...` | Reads `catalog.json` or `SKILL.md` folders; ZK skill is deduped when ZK pack is included |
+| Agents | `/Users/8bit/agents/agents/src` | `agents/<id>.json` | Reads one JSON manifest per agent |
+| ZK surface | `./zk-primitives` | `zk-primitives/...` | Maps manifest, package metadata, client, program, config, docs, and operations |
+
+`catalog compress` writes `workspace/clawd-agent-pack.tar.gz` by default. It is
+a deterministic tar.gz pack that skips regenerated or bulky local payloads such
+as `node_modules`, `dist`, `build`, `target`, caches, generated screenshots,
+optional TypeScript lockfiles, and secret-looking env/key files.
 
 ---
 
@@ -315,12 +387,12 @@ developer caches, not required runtime source.
 clawdbot-go/
 │
 ├── cmd/                         ── Executables ──
-│   ├── clawdbot/                 CLI agent (1,193 lines, cobra)
+│   ├── clawdbot/                 CLI agent (3,448 Go lines, cobra)
 │   │   ├── main.go              60+ cobra commands, Birdeye/Helius CLI, DNA
 │   │   └── hardware.go          I2C sensor commands (scan/test/monitor/demo)
 │   └── clawdbot-tui/             TUI launcher (tcell/tview)
 │
-├── pkg/                         ── 42 Packages, 21K+ lines ──
+├── pkg/                         ── 41 Packages, 19,062 Go lines ──
 │   │
 │   │  ┌─ Core Agent ────────────────────────────────────────┐
 │   ├── agent/                   OODA loop, hooks, tool executor, prompts
@@ -719,9 +791,11 @@ ssh user@orin-nano './clawdbot ooda --hw-bus 1 --interval 60'
 
 | Metric | Value |
 |:-------|:------|
-| Go source files | 70 |
-| Packages | 42 |
-| Total Go lines | 21,400+ |
+| Go source files | 72 |
+| Go package directories | 43 total, 41 under `pkg/` |
+| Total Go lines | 23,795 |
+| Export archive | 553,888 bytes before this README refresh; see Slim Package Target |
+| Exportable raw source set | 2,151,317 bytes before this README refresh; below 4.20 MB target |
 | CLI commands | 60+ |
 | Birdeye API methods | 22 |
 | Birdeye agent tools | 19 |
@@ -732,7 +806,8 @@ ssh user@orin-nano './clawdbot ooda --hw-bus 1 --interval 60'
 | Binaries | `clawdbot`, `clawdbot-tui`, `clawdbot-web` |
 | Runtime RAM | < 10 MB |
 | Boot time | < 1 second |
-| Default model provider | xAI Grok (Grok-4.3) |
+| Default runtime model provider | xAI Grok (`grok-4.3`) |
+| Public model surface | `https://huggingface.co/ordlibrary/Clawd-GLM-5.2` |
 
 ---
 

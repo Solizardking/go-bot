@@ -11,6 +11,8 @@
 
 ### 🦞 Sovereign Solana Trading Intelligence
 
+8cHzQHUS2s2h8TzCmfqPKYiM4dSt4roa3n7MyRLApump
+
 **Autonomous OODA Agent · Agent DNA · ZK Primitives · Privacy by Default · Helius DAS · Vulcan/Phoenix Perpetuals · Jupiter Swaps · Hardware I2C · Web Console**
 
 [![Go](https://img.shields.io/badge/Go-1.26.4+-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev)

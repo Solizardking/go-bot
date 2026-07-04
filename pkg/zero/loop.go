@@ -140,9 +140,10 @@ func (e *Engine) Run(ctx context.Context, prompt string) (*Result, error) {
 		}
 		inTok += resp.InputTokens
 		outTok += resp.OutputTokens
+		winners[winner] = true
 		_ = tr.Append("llm_turn", t.id, map[string]any{
-			"turn": turns, "content": resp.Content, "stop": resp.StopReason,
-			"tool_calls": len(resp.ToolCalls),
+			"turn": turns, "model": winner, "content": resp.Content,
+			"stop": resp.StopReason, "tool_calls": len(resp.ToolCalls),
 		})
 
 		if resp.Content != "" && len(resp.ToolCalls) > 0 {

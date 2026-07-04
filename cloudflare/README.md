@@ -25,22 +25,26 @@ The route configuration lives in `../wrangler.toml`.
 
 1. Put `onchainai.fund` and `x402.wtf` on Cloudflare.
 2. Deploy the Worker with `npx wrangler deploy`.
-3. Use Worker routes for exact install hosts when DNS records already exist:
+3. Use a Worker custom domain for the exact `onchainai.fund` install host:
 
 ```text
-install.onchainai.fund/*
-install.x402.wtf/*
+install.onchainai.fund
 ```
 
-4. Use Worker routes for path-based installs:
+4. Use Worker routes for `x402.wtf` installs while existing Vercel DNS records
+   are present:
 
 ```text
+install.x402.wtf/*
 x402.wtf/clawdbot*
 zk.x402.wtf/clawdbot*
 ```
 
-For the path routes, make sure the DNS records for `x402.wtf` and
-`zk.x402.wtf` exist in Cloudflare and are proxied.
+For the `x402.wtf` routes, make sure the DNS records for `install.x402.wtf`,
+`x402.wtf`, and `zk.x402.wtf` exist in Cloudflare, are proxied, and are not
+blocked by a Cloudflare challenge rule. To convert `install.x402.wtf` into a
+Worker custom domain, delete or replace its existing externally managed DNS
+record first.
 
 ## Smoke Tests
 

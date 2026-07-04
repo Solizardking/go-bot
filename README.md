@@ -48,6 +48,7 @@ The system compiles to three standalone binaries that run on everything from NVI
 | **Birdeye v3 Analytics** | 22 API endpoints, 19 LLM-callable agent tools — token overview, OHLCV, trade feeds, security audits, trending, wallet analytics |
 | **Helius DAS + RPC** | Digital Asset Standard queries (get-asset, owner-assets, search), SPL token operations (balance, supply, largest holders), raw RPC forwarding |
 | **ZK + Privacy Primitives** | Nullifiers, attestations, encrypted state commitments, and privacy-preserving proof flows under `zk-primitives/` |
+| **Zero Engine** | Zero-recursion flat agent loop (statically enforced) with zero-knowledge run attestation, ZK God Mode model racing, and NL intent routing — [docs/ZERO.md](docs/ZERO.md) |
 | **Vulcan/Phoenix Perpetuals** | Official Vulcan CLI integration for Phoenix perps — out-of-box paper mode, JSON agent output, TWAP/grid strategies, live preflight, guardrails |
 | **Aster DEX Perpetuals** | Optional HMAC-signed futures trading — market/limit orders, position management, stop-loss/take-profit, account analytics |
 | **Jupiter Aggregator** | Best-route spot swaps with slippage protection |

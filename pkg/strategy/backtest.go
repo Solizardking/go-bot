@@ -175,10 +175,21 @@ func sharpe(returns []float64) float64 {
 		varSum += d * d
 	}
 	std := math.Sqrt(varSum / float64(len(returns)-1))
-	if std == 0 {
+	// When trades cluster on near-identical fixed stops, std approaches zero and
+	// m/std explodes into a meaningless value. Require dispersion that is
+	// non-trivial relative to the mean before reporting a ratio, and clamp to a
+	// sane band so a degenerate run can't emit ±1e15.
+	if std < 1e-9 || std < 1e-6*math.Abs(m) {
 		return 0
 	}
-	return m / std
+	s := m / std
+	if s > 100 {
+		return 100
+	}
+	if s < -100 {
+		return -100
+	}
+	return s
 }
 
 // maxDrawdown returns the largest peak-to-trough decline of an equity curve as a

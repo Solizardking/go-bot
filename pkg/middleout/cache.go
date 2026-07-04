@@ -9,7 +9,6 @@
 package middleout
 
 import (
-	"bytes"
 	"container/list"
 	"crypto/sha256"
 	"encoding/hex"
@@ -215,6 +214,3 @@ func (c *Cache) Has(key string) bool {
 	_, ok := c.items[key]
 	return ok
 }
-
-// equalBytes is a small helper used by tests and routing to compare payloads.
-func equalBytes(a, b []byte) bool { return bytes.Equal(a, b) }

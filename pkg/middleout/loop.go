@@ -2,7 +2,6 @@ package middleout
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 )
@@ -166,6 +165,15 @@ func (r *Router) Route(payload []byte) (string, bool) {
 	}
 	r.cache.Put(key, []byte(best))
 	return best, true
+}
+
+// Routes returns the registered route names, in priority order.
+func (r *Router) Routes() []string {
+	names := make([]string, len(r.routes))
+	for i, rt := range r.routes {
+		names[i] = rt.Name
+	}
+	return names
 }
 
 // SizeRoute scores high for payloads at or below maxBytes — a lane for small

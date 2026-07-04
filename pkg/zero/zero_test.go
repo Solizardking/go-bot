@@ -28,8 +28,11 @@ type scriptedProvider struct {
 func (p *scriptedProvider) Name() string { return "scripted" }
 func (p *scriptedProvider) Chat(_ context.Context, opts providers.ChatOptions) (*providers.Response, error) {
 	p.calls++
-	last := opts.Messages[len(opts.Messages)-1]
-	p.prompts = append(p.prompts, last.Content)
+	var all []string
+	for _, m := range opts.Messages {
+		all = append(all, m.Content)
+	}
+	p.prompts = append(p.prompts, strings.Join(all, "\n"))
 	return p.script(p.calls, opts), nil
 }
 

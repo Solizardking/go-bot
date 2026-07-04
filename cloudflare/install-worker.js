@@ -15,6 +15,15 @@ function stripBasePath(pathname) {
   return pathname;
 }
 
+function basePath(pathname) {
+  for (const prefix of BASE_PREFIXES) {
+    if (pathname === prefix || pathname.startsWith(`${prefix}/`)) {
+      return prefix;
+    }
+  }
+  return "";
+}
+
 function shellQuote(value) {
   return `'${String(value).replace(/'/g, `'\"'\"'`)}'`;
 }
@@ -29,6 +38,7 @@ function scriptHeaders(upstream) {
 
 function metadata(url, env) {
   const origin = `${url.protocol}//${url.host}`;
+  const base = basePath(url.pathname);
   return {
     name: "clawdbot-go",
     repo: env.PROJECT_REPO || "https://github.com/Solizardking/clawdbot-go",
@@ -36,9 +46,9 @@ function metadata(url, env) {
       env.ECOSYSTEM_HUB || "https://github.com/solizardking/solana-clawd",
     upstreamInstall: env.UPSTREAM_INSTALL_URL || DEFAULT_UPSTREAM,
     commands: {
-      complete: `curl -fsSL ${origin}${url.pathname.includes("/clawdbot") ? "/clawdbot" : ""} | bash`,
-      raw: `curl -fsSL ${origin}${url.pathname.includes("/clawdbot") ? "/clawdbot" : ""}/install.sh | bash`,
-      coreAI: `curl -fsSL ${origin}${url.pathname.includes("/clawdbot") ? "/clawdbot" : ""}/core-ai | bash`,
+      complete: `curl -fsSL ${origin}${base} | bash`,
+      raw: `curl -fsSL ${origin}${base}/install.sh | bash`,
+      coreAI: `curl -fsSL ${origin}${base}/core-ai | bash`,
     },
   };
 }

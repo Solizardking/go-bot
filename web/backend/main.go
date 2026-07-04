@@ -494,6 +494,35 @@ func urlStatus(value, expected string) string {
 	return "custom"
 }
 
+// watchlistMints returns the OODA watchlist, defaulting to SOL when empty so the
+// live price endpoint always has something to quote.
+func watchlistMints(cfg *config.Config) []string {
+	if cfg != nil && len(cfg.OODA.Watchlist) > 0 {
+		return append([]string(nil), cfg.OODA.Watchlist...)
+	}
+	return []string{"So11111111111111111111111111111111111111112"}
+}
+
+func splitCSV(s string) []string {
+	parts := strings.Split(s, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, v := range values {
+		if strings.TrimSpace(v) != "" {
+			return v
+		}
+	}
+	return ""
+}
+
 // strategyParamsFromConfig maps the runtime strategy config into engine params.
 func strategyParamsFromConfig(cfg *config.Config) strategy.StrategyParams {
 	return strategy.StrategyParams{

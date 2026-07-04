@@ -256,9 +256,9 @@ func (a *ClawdAgent) Run(ctx context.Context, query string) <-chan AgentEvent {
 
 func (a *ClawdAgent) Chat(ctx context.Context, prompt string) (string, *TokenUsage, error) {
 	resp, err := a.chatOnce(ctx, []providers.Message{
-			{Role: "system", Content: a.systemPrompt},
-			{Role: "user", Content: prompt},
-		}, 1024)
+		{Role: "system", Content: a.systemPrompt},
+		{Role: "user", Content: prompt},
+	}, 1024)
 	if err != nil {
 		return "", nil, err
 	}

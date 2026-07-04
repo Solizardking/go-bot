@@ -35,13 +35,13 @@ type Config struct {
 	Gateway   GatewayConfig   `json:"gateway"`
 
 	// ClawdBot-specific
-	Solana   SolanaConfig   `json:"solana"`
-	Vulcan   VulcanConfig   `json:"vulcan"`
+	Solana    SolanaConfig    `json:"solana"`
+	Vulcan    VulcanConfig    `json:"vulcan"`
 	ClawdCode ClawdCodeConfig `json:"clawd_code"`
-	GodMode  GodModeConfig  `json:"god_mode"`
-	OODA     OODAConfig     `json:"ooda"`
-	Supabase SupabaseConfig `json:"supabase"`
-	Strategy StrategyConfig `json:"strategy"`
+	GodMode   GodModeConfig   `json:"god_mode"`
+	OODA      OODAConfig      `json:"ooda"`
+	Supabase  SupabaseConfig  `json:"supabase"`
+	Strategy  StrategyConfig  `json:"strategy"`
 }
 
 // ── Agent Defaults ───────────────────────────────────────────────────

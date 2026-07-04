@@ -129,4 +129,3 @@ func capitalizeFirst(text string) string {
 	}
 	return text
 }
-

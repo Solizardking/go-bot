@@ -64,4 +64,3 @@ type Metadata struct {
 	Transforms     []string             `json:"transforms"`
 	Feedback       FeedbackProfileState `json:"feedback,omitempty"`
 }
-

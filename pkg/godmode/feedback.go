@@ -24,8 +24,8 @@ type FeedbackRecord struct {
 // FeedbackProfileState is a read-only snapshot of learned feedback state.
 type FeedbackProfileState struct {
 	Context       ContextType `json:"context,omitempty"`
-	Positive     int         `json:"positive"`
-	Negative     int         `json:"negative"`
+	Positive      int         `json:"positive"`
+	Negative      int         `json:"negative"`
 	Total         int         `json:"total"`
 	AppliedWeight float64     `json:"applied_weight"`
 }
@@ -193,4 +193,3 @@ func addSampling(a, b SamplingParams) SamplingParams {
 		RepetitionPenalty: a.RepetitionPenalty + b.RepetitionPenalty,
 	}
 }
-

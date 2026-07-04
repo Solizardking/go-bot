@@ -18,6 +18,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"net"
 	"net/http"
 	"net/url"
@@ -204,6 +205,109 @@ func main() {
 		json.NewEncoder(w).Encode(trading.BuildCockpitReport(cfg, time.Now()))
 	})
 
+	// API: Live strategy signal — runs the real strategy engine over a series of
+	// closes/highs/lows (POST) or a deterministic demo series (GET), so the web
+	// console exercises the same Evaluate() the OODA loop uses.
+	mux.HandleFunc("/api/trading/signal", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		cfg, err := loadRuntimeConfig(absPath)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		params := strategyParamsFromConfig(cfg)
+		closes, highs, lows := demoSeries()
+		if r.Method == http.MethodPost {
+			var body struct {
+				Closes []float64 `json:"closes"`
+				Highs  []float64 `json:"highs"`
+				Lows   []float64 `json:"lows"`
+			}
+			if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&body); err != nil {
+				http.Error(w, "invalid signal payload", http.StatusBadRequest)
+				return
+			}
+			if len(body.Closes) > 0 {
+				closes = body.Closes
+				highs = body.Highs
+				lows = body.Lows
+				if len(highs) != len(closes) || len(lows) != len(closes) {
+					highs, lows = deriveHighsLows(closes)
+				}
+			}
+		}
+		sig := strategy.Evaluate(closes, highs, lows, params)
+		json.NewEncoder(w).Encode(map[string]any{
+			"params":  params,
+			"signal":  sig,
+			"samples": len(closes),
+		})
+	})
+
+	// API: Backtest — replays the strategy over a demo (GET) or posted series and
+	// returns win rate, drawdown, Sharpe, and the equity curve.
+	mux.HandleFunc("/api/trading/backtest", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		cfg, err := loadRuntimeConfig(absPath)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		params := strategyParamsFromConfig(cfg)
+		bars := demoBars(400)
+		if r.Method == http.MethodPost {
+			var body struct {
+				Bars []strategy.Bar `json:"bars"`
+			}
+			if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4<<20)).Decode(&body); err != nil {
+				http.Error(w, "invalid backtest payload", http.StatusBadRequest)
+				return
+			}
+			if len(body.Bars) > 0 {
+				bars = body.Bars
+			}
+		}
+		result := strategy.Backtest(bars, params, params.EMASlowPeriod+5)
+		json.NewEncoder(w).Encode(map[string]any{
+			"params": params,
+			"bars":   len(bars),
+			"result": result,
+		})
+	})
+
+	// API: Portfolio guard — evaluates the account-level risk gate against the
+	// current config limits and a posted (or zero) exposure snapshot.
+	mux.HandleFunc("/api/trading/portfolio", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		cfg, err := loadRuntimeConfig(absPath)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		limits := portfolioLimitsFromConfig(cfg)
+		var body struct {
+			Asset    string                `json:"asset"`
+			SizeSOL  float64               `json:"sizeSol"`
+			Exposure trading.OpenExposure  `json:"exposure"`
+		}
+		if r.Method == http.MethodPost {
+			_ = json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&body)
+		}
+		if body.SizeSOL <= 0 {
+			body.SizeSOL = cfg.Solana.MaxPositionSOL
+		}
+		result := limits.CheckEntry(body.Asset, body.SizeSOL, body.Exposure)
+		json.NewEncoder(w).Encode(map[string]any{
+			"limits":   limits,
+			"exposure": body.Exposure,
+			"candidate": map[string]any{
+				"asset":   body.Asset,
+				"sizeSol": body.SizeSOL,
+			},
+			"guard": result,
+		})
+	})
+
 	mux.HandleFunc("/api/doctor", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		cfg, err := loadRuntimeConfig(absPath)
@@ -314,6 +418,69 @@ func urlStatus(value, expected string) string {
 		return "default_public"
 	}
 	return "custom"
+}
+
+// strategyParamsFromConfig maps the runtime strategy config into engine params.
+func strategyParamsFromConfig(cfg *config.Config) strategy.StrategyParams {
+	return strategy.StrategyParams{
+		RSIOverbought:   cfg.Strategy.RSIOverbought,
+		RSIOversold:     cfg.Strategy.RSIOversold,
+		EMAFastPeriod:   cfg.Strategy.EMAFastPeriod,
+		EMASlowPeriod:   cfg.Strategy.EMASlowPeriod,
+		StopLossPct:     cfg.Strategy.StopLossPct,
+		TakeProfitPct:   cfg.Strategy.TakeProfitPct,
+		PositionSizePct: cfg.Strategy.PositionSizePct,
+		UsePerps:        cfg.Strategy.UsePerps,
+	}
+}
+
+// portfolioLimitsFromConfig derives account-level guardrails from config, using
+// conservative defaults for limits the config does not yet express.
+func portfolioLimitsFromConfig(cfg *config.Config) trading.PortfolioLimits {
+	maxConcurrent := cfg.OODA.MaxPositions
+	if maxConcurrent <= 0 {
+		maxConcurrent = 3
+	}
+	totalExposure := cfg.Solana.MaxPositionSOL * float64(maxConcurrent)
+	return trading.PortfolioLimits{
+		MaxConcurrent:     maxConcurrent,
+		MaxTotalExposure:  totalExposure,
+		MaxPerAsset:       cfg.Solana.MaxPositionSOL,
+		MaxDrawdownPct:    0.25,
+		DailyLossLimitPct: 0.10,
+	}
+}
+
+// demoSeries returns a deterministic sine-wave price series so the signal
+// endpoint has something to evaluate without live market data.
+func demoSeries() (closes, highs, lows []float64) {
+	closes = make([]float64, 120)
+	for i := range closes {
+		closes[i] = 100 + 15*math.Sin(float64(i)/6.0) + 0.05*float64(i)
+	}
+	highs, lows = deriveHighsLows(closes)
+	return closes, highs, lows
+}
+
+// deriveHighsLows synthesizes a ±2% intrabar range around each close.
+func deriveHighsLows(closes []float64) (highs, lows []float64) {
+	highs = make([]float64, len(closes))
+	lows = make([]float64, len(closes))
+	for i, c := range closes {
+		highs[i] = c * 1.02
+		lows[i] = c * 0.98
+	}
+	return highs, lows
+}
+
+// demoBars returns a deterministic OHLCV series for the backtest endpoint.
+func demoBars(n int) []strategy.Bar {
+	bars := make([]strategy.Bar, n)
+	for i := range bars {
+		base := 100 + 15*math.Sin(float64(i)/6.0) + 0.05*float64(i)
+		bars[i] = strategy.Bar{Close: base, High: base * 1.02, Low: base * 0.98}
+	}
+	return bars
 }
 
 func loadRuntimeConfig(path string) (*config.Config, error) {

@@ -58,6 +58,49 @@ func TestRedactedConfigMasksSecrets(t *testing.T) {
 	}
 }
 
+func TestStrategyParamsFromConfig(t *testing.T) {
+	cfg := config.DefaultConfig()
+	params := strategyParamsFromConfig(cfg)
+	if params.EMASlowPeriod != cfg.Strategy.EMASlowPeriod || params.EMAFastPeriod != cfg.Strategy.EMAFastPeriod {
+		t.Fatal("strategy params did not map EMA periods from config")
+	}
+	// The mapped params must drive a runnable backtest end-to-end.
+	res := strategy.Backtest(demoBars(300), params, params.EMASlowPeriod+5)
+	if res.Trades != res.Wins+res.Losses {
+		t.Fatalf("backtest inconsistent: %d != %d + %d", res.Trades, res.Wins, res.Losses)
+	}
+}
+
+func TestPortfolioLimitsFromConfig(t *testing.T) {
+	cfg := config.DefaultConfig()
+	limits := portfolioLimitsFromConfig(cfg)
+	if limits.MaxConcurrent <= 0 {
+		t.Fatal("expected positive MaxConcurrent")
+	}
+	if limits.MaxPerAsset != cfg.Solana.MaxPositionSOL {
+		t.Fatalf("MaxPerAsset = %.4f, want %.4f", limits.MaxPerAsset, cfg.Solana.MaxPositionSOL)
+	}
+	// A flat book within limits should be allowed.
+	got := limits.CheckEntry("SOL", cfg.Solana.MaxPositionSOL/2, trading.OpenExposure{
+		PeakEquity: 10, Equity: 10, SessionStartEquity: 10,
+	})
+	if !got.Allowed {
+		t.Fatalf("expected healthy entry allowed: %v", got.Reasons)
+	}
+}
+
+func TestDemoSeriesShapes(t *testing.T) {
+	closes, highs, lows := demoSeries()
+	if len(closes) == 0 || len(highs) != len(closes) || len(lows) != len(closes) {
+		t.Fatalf("demoSeries lengths mismatch: %d/%d/%d", len(closes), len(highs), len(lows))
+	}
+	for i := range closes {
+		if highs[i] < closes[i] || lows[i] > closes[i] {
+			t.Fatalf("bar %d violates high>=close>=low invariant", i)
+		}
+	}
+}
+
 func TestCorsAllowedOrigin(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, "http://127.0.0.1:18800/api/status", nil)
 	if err != nil {

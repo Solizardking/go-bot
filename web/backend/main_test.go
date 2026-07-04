@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/8bitlabs/clawdbot/pkg/config"
+	"github.com/8bitlabs/clawdbot/pkg/strategy"
+	"github.com/8bitlabs/clawdbot/pkg/trading"
 )
 
 func TestRedactedConfigMasksSecrets(t *testing.T) {

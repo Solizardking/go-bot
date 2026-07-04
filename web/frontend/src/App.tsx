@@ -137,6 +137,39 @@ interface BacktestInfo {
   }
 }
 
+interface PriceEntry {
+  mint: string
+  usdPrice: number
+  priceChange24h: number
+  liquidity: number
+}
+
+interface PricesInfo {
+  ok: boolean
+  source: string
+  asOf: string
+  count?: number
+  error?: string
+  prices: Record<string, PriceEntry>
+}
+
+interface PerpsToken {
+  token: string
+  long_io: number
+  short_io: number
+  open_interest: number
+  leverage: number
+  bias_text: string
+}
+
+interface PerpsInfo {
+  ok: boolean
+  source: string
+  asOf: string
+  error?: string
+  tokens?: PerpsToken[]
+}
+
 export default function App() {
   const [status, setStatus] = useState<StatusInfo | null>(null)
   const [health, setHealth] = useState<HealthInfo | null>(null)

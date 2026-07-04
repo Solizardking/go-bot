@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
+	"strings"
 	"time"
 )
 
@@ -191,6 +193,22 @@ type Attestation struct {
 	Nullifier         string `json:"nullifier"`
 	Events            int    `json:"events"`
 	CreatedAt         string `json:"createdAt"`
+}
+
+// ModelSetID canonicalizes a set of model IDs (dedupe, sort, join) so
+// the same winner set always hashes to the same modelHash — the ZK God
+// Mode attestation commits to *which models won*, order-independent.
+func ModelSetID(models []string) string {
+	seen := make(map[string]bool, len(models))
+	uniq := make([]string, 0, len(models))
+	for _, m := range models {
+		if m != "" && !seen[m] {
+			seen[m] = true
+			uniq = append(uniq, m)
+		}
+	}
+	sort.Strings(uniq)
+	return strings.Join(uniq, ",")
 }
 
 // Attest builds the attestation for a finished transcript.

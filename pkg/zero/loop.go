@@ -220,7 +220,38 @@ func (e *Engine) Run(ctx context.Context, prompt string) (*Result, error) {
 		}
 	}
 
-	return e.finish(tr, root, turns, len(tasksByID), inTok, outTok, start, "")
+	return e.finish(tr, root, winners, turns, len(tasksByID), inTok, outTok, start, "")
+}
+
+// chatTurn routes one LLM turn either through ZK God Mode (multi-model
+// race; winner recorded in the transcript) or straight to the provider.
+func (e *Engine) chatTurn(ctx context.Context, messages []providers.Message, defs []providers.ToolDef) (*providers.Response, string, error) {
+	if e.cfg.GodMode != nil && e.cfg.GodMode.Enabled {
+		result, err := e.cfg.GodMode.Generate(ctx, godmode.Request{
+			Model:       e.cfg.Model,
+			Models:      e.cfg.GodModeModels,
+			Messages:    messages,
+			MaxTokens:   e.cfg.MaxTokens,
+			Temperature: e.cfg.Temperature,
+			Tools:       defs,
+		})
+		if err != nil {
+			return nil, "", err
+		}
+		winner := result.Metadata.WinnerModel
+		if winner == "" {
+			winner = e.cfg.Model
+		}
+		return result.Response, winner, nil
+	}
+	resp, err := e.cfg.Provider.Chat(ctx, providers.ChatOptions{
+		Model:       e.cfg.Model,
+		Messages:    messages,
+		MaxTokens:   e.cfg.MaxTokens,
+		Temperature: e.cfg.Temperature,
+		Tools:       defs,
+	})
+	return resp, e.cfg.Model, err
 }
 
 // settle propagates one finished (done or failed) task's result to its
@@ -249,13 +280,17 @@ func (e *Engine) settle(tr *Transcript, tasksByID map[int]*task, queue *[]int, t
 	}
 }
 
-func (e *Engine) finish(tr *Transcript, root *task, turns, tasks, inTok, outTok int, start time.Time, note string) (*Result, error) {
+func (e *Engine) finish(tr *Transcript, root *task, winners map[string]bool, turns, tasks, inTok, outTok int, start time.Time, note string) (*Result, error) {
 	answer := root.result
 	if note != "" && answer == "" {
 		answer = note
 	}
+	winnerList := make([]string, 0, len(winners))
+	for m := range winners {
+		winnerList = append(winnerList, m)
+	}
 	_ = tr.Append("run_done", root.id, map[string]any{
-		"answer": answer, "turns": turns, "tasks": tasks,
+		"answer": answer, "turns": turns, "tasks": tasks, "models": ModelSetID(winnerList),
 	})
 	res := &Result{
 		Answer:       answer,
@@ -266,6 +301,7 @@ func (e *Engine) finish(tr *Transcript, root *task, turns, tasks, inTok, outTok 
 		Duration:     time.Since(start),
 		Commitment:   tr.CommitmentHex(),
 		Transcript:   tr,
+		WinnerModels: winnerList,
 	}
 	e.emit(Event{Type: EventRunDone, TaskID: root.id, Message: answer})
 	if root.state == taskFailed {

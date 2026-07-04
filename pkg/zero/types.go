@@ -89,4 +89,10 @@ type Result struct {
 	// the payloadCommitment for clawd-zk publish_attestation.
 	Commitment string
 	Transcript *Transcript
+
+	// WinnerModels lists every model that won at least one turn.
+	// Single-provider runs contain just Config.Model; ZK God Mode runs
+	// contain each race winner. Feed ModelSetID(WinnerModels) to
+	// Transcript.Attest so the attestation commits to the winner set.
+	WinnerModels []string
 }

@@ -114,7 +114,7 @@ func (e *Engine) Run(ctx context.Context, prompt string) (*Result, error) {
 
 	for head < len(queue) {
 		if err := ctx.Err(); err != nil {
-			return e.finish(tr, root, turns, len(tasksByID), inTok, outTok, start, "cancelled")
+			return e.finish(tr, root, winners, turns, len(tasksByID), inTok, outTok, start, "cancelled")
 		}
 		t := tasksByID[queue[head]]
 		head++

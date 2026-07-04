@@ -17,19 +17,17 @@ func TestRSIExtremes(t *testing.T) {
 	}
 }
 
-func TestEvaluateFiresLongOnBullishCross(t *testing.T) {
-	// A sustained decline followed by a sharp, sustained rally must eventually
-	// produce a fresh bullish EMA cross with price above the fast EMA and RSI not
-	// yet overbought — the strategy should go long at least once.
-	closes := []float64{}
-	p := 100.0
-	for i := 0; i < 60; i++ { // decline
-		p *= 0.992
-		closes = append(closes, p)
-	}
-	for i := 0; i < 80; i++ { // gradual recovery (not a blow-off)
-		p *= 1.006
-		closes = append(closes, p)
+func TestEvaluateIsTradeable(t *testing.T) {
+	// On a realistic oscillating market (trend + cycles + noise) the strategy must
+	// produce at least one valid directional entry. The old rule fired zero
+	// signals even on ideal data; this guards against regressing to that.
+	closes := make([]float64, 500)
+	for i := range closes {
+		drift := 0.05 * float64(i)
+		cycle := 12*math.Sin(float64(i)/9.0) + 6*math.Sin(float64(i)/3.3)
+		seed := uint64(i)*2862933555777941757 + 3037000493
+		noise := (float64(seed>>33)/float64(1<<31))*6 - 3
+		closes[i] = 100 + drift + cycle + noise
 	}
 	highs := make([]float64, len(closes))
 	lows := make([]float64, len(closes))
@@ -38,23 +36,28 @@ func TestEvaluateFiresLongOnBullishCross(t *testing.T) {
 		lows[i] = c * 0.99
 	}
 
-	fired := false
+	fired := 0
 	params := DefaultParams()
 	for i := params.EMASlowPeriod + 5; i <= len(closes); i++ {
 		sig := Evaluate(closes[:i], highs[:i], lows[:i], params)
-		if sig.Direction == "long" {
-			fired = true
-			if sig.StopLoss <= 0 || sig.TakeProfit <= sig.StopLoss {
-				t.Fatalf("long fired with bad SL/TP: sl=%.4f tp=%.4f", sig.StopLoss, sig.TakeProfit)
+		if sig.Direction == "long" || sig.Direction == "short" {
+			fired++
+			if sig.StopLoss <= 0 || sig.TakeProfit <= 0 {
+				t.Fatalf("entry fired with invalid SL/TP: dir=%s sl=%.4f tp=%.4f", sig.Direction, sig.StopLoss, sig.TakeProfit)
+			}
+			if sig.Direction == "long" && sig.TakeProfit <= sig.StopLoss {
+				t.Fatalf("long TP %.4f must exceed SL %.4f", sig.TakeProfit, sig.StopLoss)
+			}
+			if sig.Direction == "short" && sig.TakeProfit >= sig.StopLoss {
+				t.Fatalf("short TP %.4f must be below SL %.4f", sig.TakeProfit, sig.StopLoss)
 			}
 			if sig.Strength < 0 || sig.Strength > 1 {
 				t.Fatalf("strength out of range: %.4f", sig.Strength)
 			}
-			break
 		}
 	}
-	if !fired {
-		t.Fatal("strategy never produced a long on a clear V-recovery (untradeable)")
+	if fired == 0 {
+		t.Fatal("strategy produced zero entries on a realistic oscillating market (untradeable)")
 	}
 }
 

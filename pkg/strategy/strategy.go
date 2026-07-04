@@ -234,38 +234,45 @@ func Evaluate(closes, highs, lows []float64, params StrategyParams) StrategySign
 	signal.ATR = atr
 
 	// ── LONG signal ──────────────
-	rsiOversoldCross := rsi > float64(params.RSIOversold) && rsi < float64(params.RSIOversold+10)
+	// A fresh bullish EMA cross confirmed by price reclaiming the fast EMA, with
+	// RSI used as a filter — we go long on momentum turns but refuse to chase a
+	// tape that is already overbought. (The prior rule additionally required RSI
+	// to sit in a narrow oversold band on the same bar as a slow-EMA cross, a
+	// near-impossible coincidence that made the strategy effectively never fire.)
 	bullishCross := emaCross == "bullish"
+	rsiLongOK := rsi < float64(params.RSIOverbought)
 	priceAboveFast := currentPrice > signal.EMAFast
 
-	if rsiOversoldCross && bullishCross && priceAboveFast {
+	if bullishCross && rsiLongOK && priceAboveFast {
 		signal.Direction = "long"
-		signal.Strength = normalizeStrength(rsi, float64(params.RSIOversold), 50)
+		signal.Strength = normalizeStrength(rsi, float64(params.RSIOversold), float64(params.RSIOverbought))
 
 		// ATR-blended SL/TP
 		sl := currentPrice - math.Max(currentPrice*params.StopLossPct, atr*1.5)
 		tp := currentPrice + math.Max(currentPrice*params.TakeProfitPct, atr*3.0)
 		signal.StopLoss = sl
 		signal.TakeProfit = tp
-		signal.Reasoning = fmt.Sprintf("LONG: RSI(%.0f) crossed above %d, bullish EMA cross, price above EMA%d",
-			rsi, params.RSIOversold, params.EMAFastPeriod)
+		signal.Reasoning = fmt.Sprintf("LONG: bullish EMA%d/%d cross, price above EMA%d, RSI(%.0f) below overbought %d",
+			params.EMAFastPeriod, params.EMASlowPeriod, params.EMAFastPeriod, rsi, params.RSIOverbought)
 	}
 
 	// ── SHORT signal ─────────────
-	rsiOverboughtCross := rsi < float64(params.RSIOverbought) && rsi > float64(params.RSIOverbought-10)
+	// Mirror of the long: a fresh bearish cross confirmed by price, with RSI
+	// filtering out already-oversold tapes. Gated on UsePerps since spot cannot short.
 	bearishCross := emaCross == "bearish"
+	rsiShortOK := rsi > float64(params.RSIOversold)
 	priceBelowFast := currentPrice < signal.EMAFast
 
-	if rsiOverboughtCross && bearishCross && priceBelowFast && params.UsePerps {
+	if bearishCross && rsiShortOK && priceBelowFast && params.UsePerps {
 		signal.Direction = "short"
-		signal.Strength = normalizeStrength(100-rsi, float64(100-params.RSIOverbought), 50)
+		signal.Strength = normalizeStrength(100-rsi, float64(100-params.RSIOverbought), float64(100-params.RSIOversold))
 
 		sl := currentPrice + math.Max(currentPrice*params.StopLossPct, atr*1.5)
 		tp := currentPrice - math.Max(currentPrice*params.TakeProfitPct, atr*3.0)
 		signal.StopLoss = sl
 		signal.TakeProfit = tp
-		signal.Reasoning = fmt.Sprintf("SHORT: RSI(%.0f) crossed below %d, bearish EMA cross, price below EMA%d",
-			rsi, params.RSIOverbought, params.EMAFastPeriod)
+		signal.Reasoning = fmt.Sprintf("SHORT: bearish EMA%d/%d cross, price below EMA%d, RSI(%.0f) above oversold %d",
+			params.EMAFastPeriod, params.EMASlowPeriod, params.EMAFastPeriod, rsi, params.RSIOversold)
 	}
 
 	return signal

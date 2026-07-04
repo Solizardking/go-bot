@@ -17,6 +17,68 @@ func TestRSIExtremes(t *testing.T) {
 	}
 }
 
+func TestEvaluateFiresLongOnBullishCross(t *testing.T) {
+	// A sustained decline followed by a sharp, sustained rally must eventually
+	// produce a fresh bullish EMA cross with price above the fast EMA and RSI not
+	// yet overbought — the strategy should go long at least once.
+	closes := []float64{}
+	p := 100.0
+	for i := 0; i < 60; i++ { // decline
+		p *= 0.99
+		closes = append(closes, p)
+	}
+	for i := 0; i < 40; i++ { // recovery
+		p *= 1.015
+		closes = append(closes, p)
+	}
+	highs := make([]float64, len(closes))
+	lows := make([]float64, len(closes))
+	for i, c := range closes {
+		highs[i] = c * 1.01
+		lows[i] = c * 0.99
+	}
+
+	fired := false
+	params := DefaultParams()
+	for i := params.EMASlowPeriod + 5; i <= len(closes); i++ {
+		sig := Evaluate(closes[:i], highs[:i], lows[:i], params)
+		if sig.Direction == "long" {
+			fired = true
+			if sig.StopLoss <= 0 || sig.TakeProfit <= sig.StopLoss {
+				t.Fatalf("long fired with bad SL/TP: sl=%.4f tp=%.4f", sig.StopLoss, sig.TakeProfit)
+			}
+			if sig.Strength < 0 || sig.Strength > 1 {
+				t.Fatalf("strength out of range: %.4f", sig.Strength)
+			}
+			break
+		}
+	}
+	if !fired {
+		t.Fatal("strategy never produced a long on a clear V-recovery (untradeable)")
+	}
+}
+
+func TestBacktestProducesTradesOnRecoveries(t *testing.T) {
+	// Repeated V-recoveries must yield a non-zero number of trades now that the
+	// entry logic is tradeable.
+	bars := []Bar{}
+	p := 100.0
+	for cycle := 0; cycle < 15; cycle++ {
+		for k := 0; k < 20; k++ {
+			p *= 0.985
+			bars = append(bars, Bar{Close: p, High: p * 1.01, Low: p * 0.99})
+		}
+		for k := 0; k < 20; k++ {
+			p *= 1.03
+			bars = append(bars, Bar{Close: p, High: p * 1.01, Low: p * 0.99})
+		}
+	}
+	res := Backtest(bars, DefaultParams(), 60)
+	if res.Trades == 0 {
+		t.Fatal("backtest produced zero trades on repeated recoveries")
+	}
+}
+
 func TestAutoOptimizeSevereLossWidensStop(t *testing.T) {
 	// The <0.35 branch must be reachable; the old ordering let <0.45 shadow it.
 	p := DefaultParams()

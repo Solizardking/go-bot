@@ -296,20 +296,24 @@ type TradeStats struct {
 }
 
 // AutoOptimize adjusts strategy params based on recent performance.
+//
+// Checks run from most-severe win rate to least so that a badly losing strategy
+// widens its stop before the milder RSI adjustment can short-circuit the branch.
+// Thresholds are clamped so repeated tuning can never invert overbought/oversold.
 func AutoOptimize(params *StrategyParams, stats TradeStats) (changed bool, reason string) {
 	if stats.TradeCount < 5 {
 		return false, "insufficient trades"
 	}
 
-	if stats.WinRate < 0.45 {
-		params.RSIOverbought -= 2
-		params.RSIOversold += 2
-		return true, "tightened RSI thresholds (winRate < 45%)"
+	if stats.WinRate < 0.35 {
+		params.StopLossPct = math.Min(params.StopLossPct*1.1, 0.25)
+		return true, "widened stop loss (winRate < 35%)"
 	}
 
-	if stats.WinRate < 0.35 {
-		params.StopLossPct *= 1.1
-		return true, "widened stop loss (winRate < 35%)"
+	if stats.WinRate < 0.45 {
+		params.RSIOverbought = maxInt(params.RSIOverbought-2, 55)
+		params.RSIOversold = minInt(params.RSIOversold+2, 45)
+		return true, "tightened RSI thresholds (winRate < 45%)"
 	}
 
 	if stats.WinRate > 0.65 {
@@ -318,4 +322,76 @@ func AutoOptimize(params *StrategyParams, stats TradeStats) (changed bool, reaso
 	}
 
 	return false, "no changes needed"
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func minInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// ── Risk-based position sizing ────────────────────────────────────────
+// Volatility-aware sizing: a trade is sized so that hitting its stop loses a
+// fixed fraction of equity. Size therefore scales inversely with stop distance
+// (wider stop → smaller position) and linearly with signal confidence. This is
+// the core edge over naive fixed-fraction sizing, which risks wildly different
+// dollar amounts depending on where the stop happens to sit.
+
+// SizingInput describes one sizing decision. All monetary fields share one unit
+// (SOL here), and prices share one unit (quote currency per token).
+type SizingInput struct {
+	EquitySOL       float64 // total account equity, in SOL
+	RiskPerTradePct float64 // fraction of equity to lose if the stop is hit (e.g. 0.01 = 1%)
+	EntryPrice      float64 // planned entry price
+	StopLossPrice   float64 // planned stop price; must differ from entry
+	Confidence      float64 // 0..1 signal confidence; scales the final size
+	MaxPositionSOL  float64 // hard cap on notional (0 = no cap)
+	MaxPositionPct  float64 // cap as fraction of equity (0 = no cap)
+}
+
+// RiskAdjustedSize returns the position notional in SOL such that a stop-out
+// loses approximately RiskPerTradePct of equity, scaled by confidence and
+// clamped by the configured caps. Returns 0 when inputs are unusable, so callers
+// can fall back to a simpler sizing model.
+func RiskAdjustedSize(in SizingInput) float64 {
+	if in.EquitySOL <= 0 || in.EntryPrice <= 0 || in.RiskPerTradePct <= 0 {
+		return 0
+	}
+	stopDist := math.Abs(in.EntryPrice - in.StopLossPrice)
+	if stopDist <= 0 {
+		return 0
+	}
+	// Fractional loss on the position if price travels from entry to stop.
+	lossFrac := stopDist / in.EntryPrice
+	// Notional whose lossFrac move equals RiskPerTradePct of equity.
+	notional := (in.EquitySOL * in.RiskPerTradePct) / lossFrac
+
+	conf := in.Confidence
+	if conf <= 0 {
+		conf = 1
+	} else if conf > 1 {
+		conf = 1
+	}
+	notional *= conf
+
+	if in.MaxPositionPct > 0 {
+		if cap := in.EquitySOL * in.MaxPositionPct; notional > cap {
+			notional = cap
+		}
+	}
+	if in.MaxPositionSOL > 0 && notional > in.MaxPositionSOL {
+		notional = in.MaxPositionSOL
+	}
+	if notional < 0 {
+		return 0
+	}
+	return notional
 }

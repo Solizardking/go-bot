@@ -24,6 +24,10 @@ echo -e "${DIM}    Runtime: https://github.com/Solizardking/clawdbot-go${RESET}"
 echo -e "${DIM}    Hub:     https://github.com/solizardking/solana-clawd${RESET}"
 echo -e "${DIM}    Gateway: https://zk.x402.wtf${RESET}"
 echo -e "${DIM}    Terminal: https://cheshireterminal.ai${RESET}"
+echo -e ""
+echo -e "${PURPLE}    Lineage: PiedPiper (vs666/MinMax)${RESET}"
+echo -e "${DIM}    Classical algorithms → Solana ZK primitives${RESET}"
+echo -e "${DIM}    docs/PiedPiper-master/ · zk-primitives/docs/PIEDPIPER_ADAPTATION.md${RESET}"
 echo ""
 
 # ── Check Node.js ─────────────────────────────────────────────────

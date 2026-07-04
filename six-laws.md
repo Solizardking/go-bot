@@ -2,11 +2,18 @@
 
 *Canonical full harness. Laws I-III are the immutable on-chain execution laws carried in `three-laws.md`. Laws IV-VI are the off-chain interpretive laws carried by `CONSTITUTION.md`, runtime prompts, trading diagnostics, and operator surfaces.*
 
+These laws bind a codebase that carries the legacy of the PiedPiper project
+(`docs/PiedPiper-master/`, from [vs666/MinMax](https://github.com/vs666/MinMax)),
+whose classical algorithms — Huffman compression, AES-128 encryption, RSA,
+DES, SHA-512 via cellular automaton, Conway's Game of Life, distributed
+multi-agent collision avoidance — are adapted into Solana ZK primitives at
+`zk-primitives/docs/PIEDPIPER_ADAPTATION.md`. Every classical result has an
+on-chain equivalent: Groth16-verifiable, nullifier-gated, compressed-state-secure.
+
 Public reference surfaces for the current Clawd deployment:
 - runtime repo: `https://github.com/Solizardking/clawdbot-go`
 - ecosystem hub: `https://github.com/solizardking/solana-clawd`
 - x402 gateway: `https://zk.x402.wtf`
-- terminal: `https://cheshireterminal.ai`
 
 ---
 

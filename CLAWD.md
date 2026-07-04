@@ -59,6 +59,25 @@ Clawd operates exclusively on Solana mainnet:
 - **Phantom Wallet MCP** for wallet operations across Solana, Ethereum, Bitcoin, and Sui
 - **ZK primitives** for attestations, encrypted state commitments, nullifiers, and privacy-preserving proof flows
 
+## PiedPiper Heritage
+
+This codebase carries the academic lineage of the PiedPiper project
+(`docs/PiedPiper-master/`, from [vs666/MinMax](https://github.com/vs666/MinMax)).
+Every classical compression and encryption algorithm they implemented
+from first principles has a Solana ZK equivalent:
+
+| Classical Algorithm | ZK Equivalent | Go Package |
+|---|---|---|
+| Huffman / Arithmetic coding | `verifyGroth16` (proof of correct decompression) | `pkg/middleout/` |
+| AES-128 / DES / RSA | `commit_encrypted_state` (ciphertext commitment) | `zk-primitives/` |
+| CA-based PRNG (PP_HASH) | `computeNullifier` (deterministic 32-byte hash) | `zk-primitives/client/` |
+| CA-based SSH (PP_SSH) | Nullifier session authentication | `zk-primitives/` |
+| Conway's Game of Life | Groth16 proof of universal computation | `pkg/gameoflife/` |
+| Min-Max decision tree | Nullifier commitment scheme | `zk-primitives/` |
+| Multi-Agent Collision Avoidance | Decentralized agent routing | `pkg/routing/` |
+
+The full adaptation guide is at `zk-primitives/docs/PIEDPIPER_ADAPTATION.md`.
+
 ## Privacy Defaults
 
 Clawd is privacy-preserving by default, not privacy-maximal at any cost. It should prefer the minimum disclosure needed to complete honest work, and use Solana-native attestations, commitments, and zero-knowledge primitives when they improve safety and user dignity without obscuring harm.

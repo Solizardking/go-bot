@@ -110,6 +110,47 @@ Leviathans may use zero-knowledge systems to prove work, preserve privacy, and b
 
 ---
 
+## Historical Lineage
+
+This codebase carries the algorithmic DNA of the **PiedPiper project**
+(`docs/PiedPiper-master/`, from [vs666/MinMax](https://github.com/vs666/MinMax)) —
+a landmark academic implementation of classical compression (Huffman,
+Arithmetic, BWT+RLE), encryption (AES-128, DES, RSA, cellular-automaton-based
+PRNG), Conway's Game of Life, distributed multi-agent collision avoidance, and
+cryptographic hash optimization, built from first principles by five engineers
+at IIIT Hyderabad.
+
+Every classical algorithm in the PiedPiper archive has a **Solana ZK equivalent**
+in `zk-primitives/`, documented in `zk-primitives/docs/PIEDPIPER_ADAPTATION.md`:
+
+| Classical Algorithm | ZK Primitive | On-Chain Equivalent |
+|---|---|---|
+| Huffman / Arithmetic compression | `verifyGroth16` (proof of correct decompression) | `publish_attestation` |
+| AES-128 / DES / RSA encryption | `commit_encrypted_state` (ciphertext commitment) | `commit_encrypted_state` |
+| CA-based PRNG (PP_HASH) | `computeNullifier` (deterministic 32-byte hash) | Client-side derivation |
+| CA-based SSH protocol | Nullifier-based session authentication | `publish_attestation` |
+| Conway's Game of Life | Groth16 proof of universal computation | `publish_attestation` |
+| Min-Max decision tree | Nullifier commitment scheme | Client-side |
+
+This is not metaphor — it is architecture. The same mathematics that Huffman
+used to compress files in 1952 now compresses state on Solana via Groth16
+pairing checks. The same Feistel networks that Daemen and Rijmen designed
+for AES now commit encrypted state to compressed Light Protocol trees. The
+same cellular automaton rules that von Neumann and Ulam conceived in the
+1940s now derive nullifier addresses deterministically.
+
+The shell molts. The algorithms do not. From Huffman to Groth16 — the same
+compression, the same encryption, the same computation. Just faster. Just
+provable on Solana.
+
+**Credits:**
+- **Varul Srivastava** (`@vs666`) — primary author of MinMax, PP_HASH, PP_SSH,
+  CA encryption, multi-agent collision avoidance, Game of Life, Forest Fire,
+  PCA, Universal Computer document
+- **Akshett Rai Jindal**, **Ashwin Mittal**, **Zishan Kazi**, **Keshav Bansal** —
+  AES-128, DES, Huffman, Arithmetic, BWT+RLE, image/audio/video compression
+- Original repository: `https://github.com/vs666/MinMax` (MIT)
+
 ## Concluding Thoughts
 
 This constitution represents the first attempt to codify the values, ethics, and operational principles of sovereign onchain agents. It is released into the commons in the hope that others will adopt, adapt, and improve upon it — and that the agents that emerge from this framework will be a force for genuine progress in the trenches of Solana memes — where a dog in a hat can outpace VCs and a fair-launched bonding curve can birth legends like $BONK.

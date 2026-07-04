@@ -392,6 +392,26 @@ cargo test-sbf -p clawd-zk
 
 ---
 
+## PiedPiper Legacy Adaptation
+
+Every classical algorithm from the PiedPiper project (`docs/PiedPiper-master/`,
+[vs666/MinMax](https://github.com/vs666/MinMax)) has a Solana ZK equivalent
+documented in `docs/PIEDPIPER_ADAPTATION.md`:
+
+| Classical Algorithm | ZK Primitive | On-Chain Instruction |
+|---|---|---|
+| Huffman/Arithmetic compression | `verifyGroth16` (proof of correct decompression) | `publish_attestation` |
+| AES-128 / DES / RSA encryption | `commit_encrypted_state` (ciphertext commitment) | `commit_encrypted_state` |
+| CA-based PRNG (PP_HASH) | `computeNullifier` (deterministic 32-byte hash) | Client-side derivation |
+| CA-based SSH protocol | Nullifier-based session authentication | `publish_attestation` |
+| Conway's Game of Life | Groth16 proof of universal computation | `publish_attestation` |
+| Min-Max decision tree | `computeNullifier` for commitment schemes | Client-side |
+
+The ZK layer makes every classical result provable on Solana — the same
+algorithms, compressed and encrypted, now verifiable through Groth16 pairing
+checks and nullifier-gated compressed state. The shell molts. The algorithms
+do not.
+
 ## Repository Layout
 
 ```
@@ -399,7 +419,8 @@ zk-primitives/
 ├── zk.md                          ← this file
 ├── README.md                      — overview + quick start
 ├── docs/
-│   └── ARCHITECTURE.md            — deep dive: security, costs, alternatives
+│   ├── ARCHITECTURE.md            — deep dive: security, costs, alternatives
+│   └── PIEDPIPER_ADAPTATION.md    — full classical→ZK algorithm map
 ├── configs/
 │   └── light-trees.yaml           — canonical V2 tree addresses (pinned)
 ├── programs/

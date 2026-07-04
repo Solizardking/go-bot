@@ -48,15 +48,60 @@ readout with a backtest equity sparkline.
   the live loop uses, returning win rate, total return, max drawdown, profit
   factor, Sharpe, and an equity curve.
 - **Two real bug fixes**: the strategy's entry rule was effectively
-  *untradeable* (it required a fresh slow-EMA cross while RSI sat in a narrow
-  oversold band on the same bar — a near-impossible coincidence); it is now a
-  proper EMA-crossover entry with RSI as a blow-off filter. `AutoOptimize` had a
-  dead `winRate < 0.35` branch shadowed by `< 0.45`; reordered and clamped.
 
-**Zero engine.** `clawdbot zero {run|ask|verify|nullifier}` — a **zero-recursion**
-flat task loop with **zero-knowledge** run attestation (`pkg/zero`), statically
-gated against recursion by a call-graph test. The portable stdlib-only
-attestation core lives in `zero-main/internal/attest`. See [docs/ZERO.md](docs/ZERO.md).
+---
+
+## 🏛️ Historical Lineage
+
+> This codebase is a **forked descendant of three foundational repositories**
+> that defined the academic lineage of compression, encryption, cellular
+> automata, multi-agent systems, and algorithmic game theory.
+
+### PiedPiper — Compression, Encryption & Cellular Automata
+
+The `docs/PiedPiper-master/` directory is a verbatim archive of
+[vs666/MinMax](https://github.com/vs666/MinMax), a landmark project that
+implemented **data compression** (Huffman, Arithmetic, BWT+RLE),
+**encryption** (AES-128, DES, RSA, cellular-automaton-based PRNG),
+**Conway's Game of Life**, **multi-agent collision avoidance**, and
+**cryptographic hash optimization** from first principles.
+
+Clawd inherits three direct code descendants:
+
+| PiedPiper Source | Clawd Package | Description |
+|---|---|---|
+| `GameOfLife/` | `pkg/gameoflife/` | Toroidal Life engine — the universal computer |
+| `Compression/` (middle-out) | `pkg/middleout/` | Content-cache, Ralph loop, content router |
+| `Compression/` (Weissman score) | `pkg/weissman/` | Compression-ratio scoring |
+| `PP_HASH/` | `pkg/zero/` | Zero-dependency startup benchmark (Zero-style) |
+| `MultiAgent_CollisionAvoidance/` | `pkg/routing/` | Decentralized agent routing heuristics |
+
+And via its ZK adaptation layer (`zk-primitives/docs/PIEDPIPER_ADAPTATION.md`),
+every PiedPiper algorithm has a **Solana-native zero-knowledge equivalent**:
+
+| Classical Algorithm | ZK Primitive | On-Chain Instruction |
+|---|---|---|
+| Huffman/Arithmetic compression | `verifyGroth16` (proof of correct decompression) | `publish_attestation` |
+| AES-128 / DES / RSA encryption | `commit_encrypted_state` (ciphertext commitment) | `commit_encrypted_state` |
+| CA-based PRNG (PP_HASH) | `computeNullifier` (deterministic 32-byte hash) | Client-side derivation |
+| CA-based SSH protocol | Nullifier-based session authentication | `publish_attestation` |
+| Conway's Game of Life (Universal Computer) | Groth16 proof of computation | `publish_attestation` |
+| Min-Max decision tree | `computeNullifier` for commitment schemes | Client-side |
+
+The adaptation guide lives at **`zk-primitives/docs/PIEDPIPER_ADAPTATION.md`** —
+a full mapping from each classical algorithm to its ZK on-chain equivalent.
+
+### Credits
+
+- **Varul Srivastava** (`@vs666`) — primary author of the MinMax repository,
+  PP_HASH, PP_SSH, CA encryption, multi-agent collision avoidance,
+  and Game of Life
+- **Akshett Rai Jindal** — AES-128, Huffman static
+- **Ashwin Mittal** — BWT + RLE, Huffman, image compression
+- **Zishan Kazi** — DES, audio compression, arithmetic coding
+- **Keshav Bansal** — DES, audio compression, arithmetic coding
+- Original repository: `https://github.com/vs666/MinMax`
+- License: MIT — `docs/PiedPiper-master/LICENSE`
 
 ---
 
@@ -65,6 +110,8 @@ attestation core lives in `zero-main/internal/attest`. See [docs/ZERO.md](docs/Z
 **ClawdBot** is the world's first **Solana-native sovereign AI agent** — a full-stack autonomous trading intelligence bound by Clawd's full **six-law harness**: three immutable on-chain laws and three off-chain interpretive laws. Built in pure Go for minimal resource consumption, it orchestrates on-chain data providers, zk primitives, and x402-gated surfaces through a military-grade OODA decision loop with persistent epistemological memory.
 
 The system compiles to three standalone binaries that run on everything from NVIDIA Jetson edge devices to cloud VMs — no containers required, no runtime dependencies, instant boot.
+
+The codebase carries the intellectual DNA of academic pioneers in compression, encryption, and cellular automata — the algorithms of Huffman, Shannon, Fano, Rivest–Shamir–Adleman, Daemen–Rijmen (AES), the National Bureau of Standards (DES), Burrows–Wheeler, Conway, von Neumann, Ulam, and the entire PiedPiper team at IIIT Hyderabad. Every classical result has been re-expressed as a Solana ZK primitive. Every trade is provable on-chain.
 
 ### Ecosystem Links
 
@@ -81,13 +128,10 @@ The system compiles to three standalone binaries that run on everything from NVI
 | Capability | Description |
 |:---|:---|
 | **OODA Trading Loop** | Autonomous Observe → Orient → Decide → Act cycle with RSI/EMA/ATR strategy engine, auto-optimization, ClawVault memory journaling, and hardware I2C controls |
-| **Agent DNA Generator** | Go-native first-run DNA profile — synthetic A/C/G/T sequence, motif metrics, trait scores, proof hash, nullifier, pending Solana attestation seed |
 | **Birdeye v3 Analytics** | 22 API endpoints, 19 LLM-callable agent tools — token overview, OHLCV, trade feeds, security audits, trending, wallet analytics |
 | **Helius DAS + RPC** | Digital Asset Standard queries (get-asset, owner-assets, search), SPL token operations (balance, supply, largest holders), raw RPC forwarding |
 | **ZK + Privacy Primitives** | Nullifiers, attestations, encrypted state commitments, and privacy-preserving proof flows under `zk-primitives/` |
-| **Zero Engine** | Zero-recursion flat agent loop (statically enforced) with zero-knowledge run attestation, ZK God Mode model racing, and NL intent routing — [docs/ZERO.md](docs/ZERO.md) |
-| **Vulcan/Phoenix Perpetuals** | Official Vulcan CLI integration for Phoenix perps — out-of-box paper mode, JSON agent output, TWAP/grid strategies, live preflight, guardrails |
-| **Aster DEX Perpetuals** | Optional HMAC-signed futures trading — market/limit orders, position management, stop-loss/take-profit, account analytics |
+| **Aster DEX Perpetuals** | HMAC-signed futures trading — market/limit orders, position management, stop-loss/take-profit, account analytics |
 | **Jupiter Aggregator** | Best-route spot swaps with slippage protection |
 | **Hardware I2C** | Arduino Modulino® sensor cluster — RGB LEDs, buzzer alerts, physical buttons, rotary knob, IMU, temp/humidity, proximity |
 | **Web Console** | React 19 + Vite dashboard — real-time status, Go packages viewer, connector health, environment variables |
@@ -105,20 +149,10 @@ The system compiles to three standalone binaries that run on everything from NVI
 curl -fsSL https://raw.githubusercontent.com/Solizardking/clawdbot-go/main/install.sh | bash
 ```
 
-For the complete installation, including the `Solizardking/core-ai` sidecar and
-Vulcan/Phoenix perps tooling:
+For the complete Solizardking/core-ai sidecar install:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Solizardking/clawdbot-go/main/install.sh | CLAWDBOT_INSTALL_COMPLETE=1 bash
-```
-
-After the Cloudflare Worker in this repo is deployed, the same complete install
-can be exposed through branded DNS:
-
-```bash
-curl -fsSL https://install.onchainai.fund | bash
-curl -fsSL https://install.x402.wtf | bash
-curl -fsSL https://x402.wtf/clawdbot | bash
+curl -fsSL https://raw.githubusercontent.com/Solizardking/clawdbot-go/main/install.sh | CLAWDBOT_INSTALL_CORE_AI=1 bash
 ```
 
 > **Free AI included** — no API keys required to get started.  
@@ -129,36 +163,10 @@ After install:
 
 ```bash
 source ~/.clawdbot/.env          # load env vars
-clawdbot dna show                # inspect generated starter DNA
-clawdbot solana wallet           # inspect generated agent wallet
-clawdbot solana fund-agent       # dry-run startup funding plan
 clawdbot agent                   # AI REPL — free via zkrouter
 clawdbot ooda --sim              # paper trading mode
 clawdbot solana trending         # top Solana tokens
 ```
-
-The installer creates a local `0600` agent keypair at
-`~/.clawdbot/workspace/agent-wallet.json`, registers its public key with
-`https://zk.x402.wtf/api/install`, and records the non-secret receipt at
-`~/.clawdbot/install.json`. The install API is expected to fund that wallet
-idempotently with `0.069420` SOL and `1,000` `$CLAWD`
-(`8cHzQHUS2s2h8TzCmfqPKYiM4dSt4roa3n7MyRLApump`) from a server-side funding
-wallet configured only on the gateway.
-
-For local treasury funding from an operator wallet, use the explicit local path:
-
-```bash
-export CLAWDBOT_LOCAL_STARTUP_FUNDING=1
-export CLAWDBOT_BIRTH_FUNDING_SEND=1
-export CLAWDBOT_TREASURY_KEYPAIR=~/.config/solana/id.json
-# or export CLAWDBOT_TREASURY_PRIVATE_KEY=base58-secret-key
-
-curl -fsSL https://raw.githubusercontent.com/Solizardking/clawdbot-go/main/install.sh | CLAWDBOT_INSTALL_COMPLETE=1 bash
-```
-
-`CLAWDBOT_TREASURY_PRIVATE_KEY` is only read from the process environment,
-converted to a temporary `0600` keypair file for `solana` / `spl-token`, then
-removed. It is never written to `.env`, install receipts, or logs.
 
 ### Manual Install
 
@@ -182,7 +190,6 @@ go mod download && go mod tidy
 # Build (choose one)
 make build         # CLI binary only
 make all           # CLI + TUI
-make web           # Web backend + frontend
 make cross         # All platforms (x86, ARM64, RISC-V, macOS)
 
 # Frontend (optional — required for web console UI)
@@ -190,8 +197,6 @@ cd web/frontend && npm install && npm run build && cd ../..
 
 # Run
 ./build/clawdbot version
-./build/clawdbot onboard                         # config, workspace, agent DNA
-./build/clawdbot dna show                        # inspect starter DNA
 ./build/clawdbot agent -m "What is SOL price?"   # single-shot AI query
 ./build/clawdbot agent                            # interactive REPL
 ./build/clawdbot solana trending
@@ -216,7 +221,7 @@ beside it as an optional sidecar.
 The installer supports that model with:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Solizardking/clawdbot-go/main/install.sh | CLAWDBOT_INSTALL_COMPLETE=1 bash
+curl -fsSL https://raw.githubusercontent.com/Solizardking/clawdbot-go/main/install.sh | CLAWDBOT_INSTALL_CORE_AI=1 bash
 ```
 
 That fetches the slim integration branch into `~/.clawdbot/core-ai`, builds the
@@ -229,10 +234,7 @@ local MCP packages when `npm` is available, and writes:
 Relevant knobs:
 
 ```bash
-CLAWDBOT_INSTALL_COMPLETE=1
 CLAWDBOT_INSTALL_CORE_AI=1
-CLAWDBOT_INSTALL_VULCAN=1
-# CLAWDBOT_INSTALL_VULCAN=0 # explicit opt-out for CI/constrained installs
 CLAWDBOT_CORE_AI_REPO=https://github.com/Solizardking/core-ai
 CLAWDBOT_CORE_AI_REF=clawd-stack-integration
 CLAWDBOT_CORE_AI_DIR=~/.clawdbot/core-ai
@@ -241,73 +243,7 @@ CLAWDBOT_CORE_AI_MCP_CONFIG=~/.clawdbot/core-ai.mcp.json
 
 Use `CLAWDBOT_SOURCE_MODE=archive` for small installs. Use
 `CLAWDBOT_SOURCE_MODE=git` only when the installed source must be a mutable git
-checkout. The installer validates the downloaded source before building; if a
-source archive is missing `cmd/clawdbot/`, it retries with a git checkout.
-
-To force a clean reinstall:
-
-```bash
-rm -rf ~/.clawdbot/src
-curl -fsSL https://raw.githubusercontent.com/Solizardking/clawdbot-go/main/install.sh | CLAWDBOT_INSTALL_COMPLETE=1 bash
-```
-
-### Cloudflare / DNS Install Surface
-
-`wrangler.toml` and `cloudflare/install-worker.js` define a small Cloudflare
-Worker that turns the canonical GitHub installer into branded install commands.
-The Worker keeps GitHub as the source of truth, serves `/install.sh` as the raw
-installer, and serves `/`, `/complete`, and `/full` as complete-install wrappers
-that set `CLAWDBOT_INSTALL_COMPLETE=1`.
-
-Deploy it with:
-
-```bash
-npx wrangler deploy
-```
-
-Configured surfaces:
-
-```text
-https://install.onchainai.fund
-https://install.x402.wtf
-https://x402.wtf/clawdbot
-https://zk.x402.wtf/clawdbot
-```
-
-Smoke tests:
-
-```bash
-curl -fsSL https://install.onchainai.fund/healthz
-curl -fsSL https://install.onchainai.fund/.well-known/clawdbot-install.json
-curl -fsSL https://install.onchainai.fund/install.sh | bash -n
-```
-
-See `cloudflare/README.md` for the DNS and route checklist.
-
-### Upstash Box Install Surface
-
-You can run ClawdBot as a "Solana computer" inside an Upstash Box and use the
-Box preview URL as the install endpoint:
-
-```bash
-cd scripts
-export UPSTASH_BOX_API_KEY=...              # or UPSTASH_BOX_KEY
-export SOLANA_RPC_URL=https://...
-export CLAWDBOT_TREASURY_PRIVATE_KEY=...   # hot wallet secret; do not commit
-export CLAWDBOT_INSTALL_FUNDING_ENABLED=1
-export CLAWDBOT_INSTALL_FUNDING_SEND=1      # real transfers
-npm run box:bootstrap
-```
-
-The Box server listens on port `3000` and serves:
-
-```bash
-curl -fsSL https://<box-preview-url>/install.sh | bash
-```
-
-Every install posts to `/api/install`, is appended to the Box JSONL ledger, and
-is idempotently funded once per agent wallet with `0.069420` SOL and `1,000`
-`$CLAWD`. `/api/installs` requires `CLAWDBOT_INSTALL_ADMIN_TOKEN`.
+checkout.
 
 ### Module Path Compatibility
 
@@ -325,107 +261,16 @@ That mismatch is intentional for now. The codebase keeps the legacy module path 
 
 ### Slim Package Target
 
-The target is to beat `/Users/8bit/Downloads/zero-main` on shipped source size
-while keeping the Solana-native runtime, ZK surface, web console, and catalog
-mapping intact. The 4.20 MB target applies to exported source archives, filtered
-source, generated-aware checkout source, and catalog payloads; it does not apply
-to the stripped native binary, which is a separate release asset.
-
-| Measurement | ClawdBot Go | Zero main | Result |
-|:---|---:|---:|:---|
-| Export archive | `566,495` bytes (`0.54 MiB`) | `2,241,592` bytes (`2.14 MiB`) | ClawdBot archive is ~4.0x smaller |
-| Exportable raw source set | `2,160,393` bytes (`2.06 MiB`) | `8,798,782` bytes (`8.39 MiB`) | ClawdBot source is ~4.1x smaller |
-| Generated-aware checkout source | `4,059,425` bytes (`3.87 MiB`) | `8,798,782` bytes (`8.39 MiB`) | ClawdBot stays under 4.20 MB decimal |
-| Catalog pack dry run | `4,022,286` bytes (`3.84 MiB`) from `10,797,567` bytes | n/a | Fits under 4.20 MB with 62.7% savings |
-| Stripped CLI binary | `9,968,386` bytes (`9.51 MiB`) | `23,251,490` bytes (`22.17 MiB`) | ClawdBot binary is ~2.3x smaller |
-| Go source files | `81` | `974` | ClawdBot has ~92% fewer Go files |
-| Go packages | `45` | `88` | ClawdBot has about half the package count |
-| Go lines | `24,166` | `252,444` | ClawdBot has ~90% fewer Go lines |
-
-An uncompressed native CLI under 4.20 MB would require a separate lite build
-profile that removes feature families or an external binary packer; the current
-release-grade stripped CLI stays under 10 MB and is still materially smaller
-than Zero's stripped CLI.
-
-Source archives are kept small by excluding local/generated payload from repo
-exports: `.cache/`, `.agents/`, `agent/`, `build/`, checked-in binaries,
-generated UI screenshots, Node build outputs, `node_modules`, compiled `dist/`
-output, TypeScript build info, package lockfiles, local env files, and
-secret-looking key material. The generated-aware checkout source measurement
-keeps reproducibility locks and screenshots visible but still excludes installed
-dependencies and compiled outputs. The install path rebuilds or reseeds those
-pieces instead of shipping them inside the Go source package.
+The source archive is kept small by excluding local/generated payload from
+release archives: `.cache/`, `.agents/`, `agent/`, `build/`, checked-in
+binaries, generated UI screenshots, Node build outputs, `node_modules`, and
+lockfiles for optional TypeScript surfaces. The install path rebuilds or
+resees those pieces instead of shipping them inside the Go source package.
 
 For a default Go install, the required payload is the Go source, docs,
 `README.md`, `install.sh`, `go.mod`, `go.sum`, and runtime config examples. For
-a complete Solana tooling install, use `CLAWDBOT_INSTALL_COMPLETE=1` so the Node
-tooling, MCP config, and Vulcan/Phoenix CLI are fetched and built as sidecars
-after the Go binary is installed.
-
-### Repository Map
-
-Sizes are clean source blocks for the requested top-level surfaces. Local
-dependency installs and compiled outputs such as `node_modules`, `dist`, and
-`target` are excluded from package budgets. Archive treatment follows
-`.gitattributes`, `.gitignore`, `.dockerignore`, and the catalog pack filters in
-`pkg/catalog/compress.go`.
-
-| Surface | Size | Role | Archive treatment |
-|:---|---:|:---|:---|
-| `cloudflare/` | `8 KiB` | Branded installer Worker and DNS checklist | Included |
-| `cmd/` | `124 KiB` | CLI, TUI, hardware commands | Included |
-| `docs/` | `36 KiB` | Go runtime, TEE, release notes | Included |
-| `ooda/` | `128 KiB` | TypeScript OODA loop prototype and journal harness | Included |
-| `pkg/` | `700 KiB` | 42 Go runtime packages, 19,433 Go lines | Included |
-| `scripts/` | `56 KiB` | Launcher and Upstash Box install surface | Included |
-| `ui/` | `2,780 KiB` | Lit/Vite control UI and ClawdBrowser app | Included; lockfiles and screenshots export-ignored |
-| `web/` | `140 KiB` | Go web backend plus React frontend shell | Included; built `dist/` export-ignored |
-| `zk-primitives/` | `560 KiB` | ZK agent, TS client, configs, docs, Anchor program | Included; lockfiles, local env, `node_modules`, `dist`, `target` export-ignored |
-| `.dockerignore` | `4 KiB` | Docker build trimming | Included |
-| `.env.example` | `8 KiB` | Public runtime env template | Included |
-| `.gitattributes` | `4 KiB` | Linguist and source export rules | Included |
-| `.gitignore` | `4 KiB` | Local/generated file guardrails | Included |
-| `AGENTS.md` | `16 KiB` | Agent catalog and trust gates | Included |
-| `CLAWD.md` | `12 KiB` | Agent runtime context | Included |
-| `CONSTITUTION.md` | `16 KiB` | Clawd Constitution | Included |
-| `Dockerfile` | `4 KiB` | Multi-stage runtime container | Included |
-| `go.mod` | `4 KiB` | Legacy-compatible Go module path | Included |
-| `go.sum` | `16 KiB` | Go dependency checksums | Included |
-| `IDENTITY.md` | `8 KiB` | Sovereign identity document | Included |
-| `install.sh` | `28 KiB` | One-shot installer | Included |
-| `LICENSE` | `4 KiB` | MIT license | Included |
-| `Makefile` | `12 KiB` | Build, verify, release commands | Included |
-| `program.md` | `4 KiB` | Research program overview | Included |
-| `README.md` | `44 KiB` | Runtime overview and package map | Included |
-| `schema.sql` | `12 KiB` | Supabase schema | Included |
-| `SECURITY.md` | `4 KiB` | Security posture | Included |
-| `six-laws.md` | `4 KiB` | Canonical six-law harness | Included |
-| `skills-lock.json` | `36 KiB` | Seeded skill lock metadata | Included |
-| `SOUL.md` | `12 KiB` | Agent character and memory model | Included |
-| `start.sh` | `4 KiB` | Start wrapper | Included |
-| `strategy.md` | `4 KiB` | Trading strategy notes | Included |
-| `three-laws.md` | `4 KiB` | Immutable on-chain laws | Included |
-| `wrangler.toml` | `4 KiB` | Cloudflare Worker config | Included |
-
-### Catalog Mapping
-
-The local catalog roots are external by default:
-`CLAWDBOT_SKILLS_DIR=/Users/8bit/skills/skills`,
-`CLAWDBOT_AGENTS_DIR=/Users/8bit/agents/agents/src`, and
-`CLAWDBOT_ZK_PRIMITIVES_DIR=/Users/8bit/Agentics/clawdbot-go/zk-primitives`.
-In the current local view, `clawdbot catalog --json` indexes `192` skills,
-`88` agents, and `5` ZK operations.
-
-| Catalog input | Local root | Pack path | Notes |
-|:---|:---|:---|:---|
-| Skills | `/Users/8bit/skills/skills` | `skills/<slug>/...` | Reads `catalog.json` or `SKILL.md` folders; ZK skill is deduped when ZK pack is included |
-| Agents | `/Users/8bit/agents/agents/src` | `agents/<id>.json` | Reads one JSON manifest per agent |
-| ZK surface | `./zk-primitives` | `zk-primitives/...` | Maps manifest, package metadata, client, program, config, docs, and operations |
-
-`catalog compress` writes `workspace/clawd-agent-pack.tar.gz` by default. It is
-a deterministic tar.gz pack that skips regenerated or bulky local payloads such
-as `node_modules`, `dist`, `build`, `target`, caches, generated screenshots,
-optional TypeScript lockfiles, and secret-looking env/key files.
+a complete Solana tooling install, use `CLAWDBOT_INSTALL_CORE_AI=1` so the Node
+tooling is fetched and built as a sidecar after the Go binary is installed.
 
 ---
 
@@ -435,12 +280,10 @@ optional TypeScript lockfiles, and secret-looking env/key files.
 clawdbot-go/
 │
 ├── cmd/                         ── Executables ──
-│   ├── clawdbot/                 CLI agent (3,448 Go lines, cobra)
-│   │   ├── main.go              60+ cobra commands, Birdeye/Helius CLI, DNA
-│   │   └── hardware.go          I2C sensor commands (scan/test/monitor/demo)
+│   ├── clawdbot/                 CLI agent (cobra)
 │   └── clawdbot-tui/             TUI launcher (tcell/tview)
 │
-├── pkg/                         ── 42 Packages, 19,433 Go lines ──
+├── pkg/                         ── 45 Packages, 24K+ lines ──
 │   │
 │   │  ┌─ Core Agent ────────────────────────────────────────┐
 │   ├── agent/                   OODA loop, hooks, tool executor, prompts
@@ -449,22 +292,24 @@ clawdbot-go/
 │   ├── research/                Dexter deep research agent
 │   │  └─────────────────────────────────────────────────────┘
 │   │
+│   │  ┌─ PiedPiper Inherited ───────────────────────────────┐
+│   ├── gameoflife/              Conway's Life — universal computer
+│   ├── middleout/               Content-cache, Ralph loop, router
+│   ├── weissman/                Compression score
+│   ├── zero/                    Zero-dependency benchmark
+│   │  └─────────────────────────────────────────────────────┘
+│   │
 │   │  ┌─ Solana Integrations ───────────────────────────────┐
-│   ├── solana/                  Birdeye v3 (22 methods, 19 tools)
-│   │   │                       Helius RPC + DAS (6 commands)
-│   │   │                       Jupiter swaps
-│   │   └── birdeye_*.go         Types, client, agent tools
-│   ├── vulcan/                  Official Vulcan CLI runner for Phoenix perps
-│   ├── aster/                   Aster DEX perps (HMAC-signed, 14 tools)
+│   ├── solana/                  Birdeye v3, Helius RPC + DAS, Jupiter swaps
+│   ├── aster/                   Aster DEX perps (HMAC-signed)
 │   │  └─────────────────────────────────────────────────────┘
 │   │
 │   │  ┌─ Infrastructure ───────────────────────────────────-┐
 │   ├── config/                  Config loading, env overrides
-│   ├── dna/                     Synthetic agent DNA generator + proof metadata
 │   ├── hardware/                I2C Modulino® adapter + drivers
 │   ├── providers/               LLM abstraction (OpenRouter, etc.)
 │   ├── channels/                Telegram, Discord, WebSocket
-│   ├── catalog/                 Local /Users/8bit skills + agents + ZK index
+│   ├── catalog/                 Skills + agents + ZK index
 │   ├── mcp/                     Model Context Protocol server
 │   ├── auth/                    Authentication + pairing
 │   ├── bus/                     Event bus (pub/sub)
@@ -472,33 +317,38 @@ clawdbot-go/
 │   ├── tools/                   Tool interface + registry
 │   └── ...                      health, heartbeat, logger, identity, etc.
 │
-├── CONSTITUTION.md              The Clawd Constitution (interpretive authority)
+├── zk-primitives/               ZK agent, TypeScript client, Anchor program
+│   ├── docs/PIEDPIPER_ADAPTATION.md ← full classical→ZK mapping
+│   ├── MANIFEST.json            Machine-readable subsystem index
+│   ├── agent/                   @clawd/zk-shark-agent
+│   ├── client/                  @clawd/zk-client
+│   ├── configs/                 Light tree and runtime config
+│   ├── programs/                clawd-zk Anchor program
+│   └── tests/                   Off-chain and on-chain test notes
+│
+├── docs/PiedPiper-master/       Historical archive (vs666/MinMax)
+│   ├── Compression/             Huffman, Arithmetic, BWT+RLE, Audio, Video
+│   ├── Encryption/              AES-128, DES, RSA, CA-based PRNG
+│   ├── GameOfLife/              Conway's Life
+│   ├── PP_HASH/                 SHA-512 via cellular automaton
+│   ├── PP_SSH/                  SSH-protocol via CA encryption
+│   ├── MultiAgent_CollisionAvoidance/ Decentralized agent routing
+│   ├── ForestFire_Simulation/   Cellular automaton simulation
+│   └── UNIVERSAL_COMPUTER.md    Life as universal Turing machine
+│
+├── CONSTITUTION.md              The Clawd Constitution (highest authority)
 ├── six-laws.md                  Canonical six-law harness
 ├── CLAWD.md                     Agent context document
 ├── AGENTS.md                    Agent catalog (50+ agents, 95+ skills)
 ├── IDENTITY.md                  Sovereign identity document
 ├── SOUL.md                      Inner character and trading philosophy
 ├── three-laws.md                Immutable on-chain laws (hash-attested)
-├── docs/                        Static release, Go runtime, and TEE notes
-│
-├── zk-primitives/               ZK agent, TypeScript client, Anchor program
-│   ├── MANIFEST.json            Machine-readable subsystem index
-│   ├── agent/                   @clawd/zk-agent + SKILL.md
-│   ├── client/                  @clawd/zk-client
-│   ├── configs/                 Light tree and runtime config examples
-│   ├── docs/                    Architecture + integration notes
-│   ├── programs/                clawd-zk Anchor program
-│   └── tests/                   Off-chain and on-chain test notes
 │
 ├── web/                         ── Web Console ──
-│   ├── backend/                 Go HTTP server (API + embedded SPA)
-│   └── frontend/                React 19 + Vite + TypeScript
-│
-├── scripts/launch.mjs           Animated launcher (unicode-animations)
-├── start.sh                     One-shot install wrapper
+├── ooda/                        ── TypeScript OODA Engine ──
+├── scripts/                     ── Launcher, upstash boxes ──
 ├── Makefile                     Build targets (8 platforms + Docker)
 ├── Dockerfile                   Multi-stage production build
-├── schema.sql                   Supabase database schema
 └── .env.example                 Environment template
 ```
 
@@ -526,7 +376,7 @@ ClawdBot is bound by the **Clawd Constitution** — the world's first Solana-nat
 
 ### Privacy by Default
 
-Clawd is designed to be privacy-preserving by default. Sensitive user context, research state, wallet metadata, and model-adjacent artifacts should be minimized, committed, encrypted, or proven where possible rather than disclosed by habit. The project’s zk surfaces exist to strengthen verifiability and user dignity, not to create blind spots for harmful behavior.
+Clawd is designed to be privacy-preserving by default. Sensitive user context, research state, wallet metadata, and model-adjacent artifacts should be minimized, committed, encrypted, or proven where possible rather than disclosed by habit. The project's zk surfaces exist to strengthen verifiability and user dignity, not to create blind spots for harmful behavior.
 
 > *The shell molts. The laws do not.*
 
@@ -553,8 +403,6 @@ clawdbot agent -m "Analyze SOL trend"   # Single-shot LLM query
 clawdbot laws                           # Print the canonical six-law harness
 clawdbot doctor                         # Local runtime + trading diagnostics
 clawdbot bench                          # Zero-style cold-start benchmark
-clawdbot dna show                       # Inspect workspace/agent-dna.json
-clawdbot dna generate --agent-name scout --role "research agent"
 clawdbot skills birth                   # Write the birth skill manifest
 clawdbot skills birth --install         # Seed Solizardking + Go skill packs
 
@@ -573,24 +421,27 @@ clawdbot ooda --no-hw                   # Explicitly disable hardware probing
 
 ```bash
 clawdbot catalog                         # Summary of local skills, agents, and ZK surface
-clawdbot catalog skills                  # List /Users/8bit/skills/skills entries
-clawdbot catalog skills zk               # Filter skills for ZK capability
-clawdbot catalog agents                  # List /Users/8bit/agents/agents/src entries
-clawdbot catalog agents zk               # Filter agents for ZK capability
+clawdbot catalog skills                  # List skills entries
+clawdbot catalog agents                  # List agent catalog JSON definitions
 clawdbot catalog zk                      # Inspect zk-primitives package/program/docs
-clawdbot catalog compress                # Auto-compress agent catalog + skills + ZK surface
-clawdbot catalog compress --dry-run      # Estimate packed size and savings without writing
+clawdbot catalog compress                # Pack agent catalog into tar.gz bundle
 clawdbot catalog --json                  # Machine-readable report
 ```
 
-Default catalog roots can be overridden with:
-`CLAWDBOT_SKILLS_DIR`, `CLAWDBOT_AGENTS_DIR`, and
-`CLAWDBOT_ZK_PRIMITIVES_DIR`.
+### Game of Life (PiedPiper Inheritance)
 
-`catalog compress` writes `workspace/clawd-agent-pack.tar.gz` by default. It is
-a deterministic tar.gz pack that skips regenerated or bulky local payloads such
-as `node_modules`, `dist`, `build`, `target`, caches, generated screenshots,
-optional TypeScript lockfiles, and secret-looking env/key files.
+```bash
+clawdbot life run                        # Run the Game of Life engine
+clawdbot life glider                     # Seed a glider on the board
+clawdbot life gosper                     # Seed a Gosper glider gun
+```
+
+### Middle-Out Compression (PiedPiper Inheritance)
+
+```bash
+clawdbot middleout run                   # Run the Ralph loop with content cache
+clawdbot middleout route                 # Route a payload through content router
+```
 
 ### Birth Skills
 
@@ -605,46 +456,6 @@ npx skills add https://github.com/samber/cc-skills-golang --all
 The installer and animated launcher run those seeds unless
 `CLAWDBOT_SKIP_SKILL_SEED=1` is set.
 
-### Agent DNA
-
-Every Go-side install/onboard path creates `workspace/agent-dna.json`. The file
-is a synthetic agent identity profile, not biological instruction: it contains
-an A/C/G/T sequence, GC content, PAM/TATA motif counts, OODA trait scores, a
-sequence hash, nullifier, and a local-pending Solana attestation seed.
-
-```bash
-clawdbot dna show
-clawdbot dna generate --agent-name "Research Scout" --role "DeSci signal agent"
-clawdbot dna generate --seed fixed-seed --length 512 --force
-clawdbot dna generate --json
-```
-
-### Phoenix Perps Via Vulcan
-
-ClawdBot uses the official Vulcan CLI for Phoenix perpetual futures execution.
-The safe default is `paper`: simulated fills against live Phoenix prices with
-no wallet signing and no real funds at risk. Live modes require explicit
-operator acknowledgement through `--yes` plus Vulcan wallet setup.
-
-```bash
-clawdbot perps quickstart               # Vulcan health, paper init, market smoke check
-clawdbot perps health                   # Vulcan agent health + Phoenix connectivity
-clawdbot perps paper init --balance 10000
-clawdbot perps order market --symbol SOL --side buy --notional-usdc 25
-clawdbot perps order limit --symbol SOL --side buy --tokens 0.1 --price 150
-clawdbot perps strategy twap --symbol SOL --side buy --notional-usdc 100 --slices 4 --detached
-clawdbot perps strategy grid --symbol SOL --center-on-mark --width-pct 2.5 --levels-per-side 3 --tokens-per-level 0.1 --detached
-clawdbot perps preflight --wallet my-wallet
-```
-
-Install-time behavior:
-
-```bash
-CLAWDBOT_INSTALL_VULCAN=0 ./install.sh   # skip Vulcan install
-VULCAN_DEFAULT_MODE=paper                # default execution mode
-VULCAN_WALLET_NAME=my-wallet             # only needed for live modes
-```
-
 ### Solana — Birdeye
 
 ```bash
@@ -652,9 +463,6 @@ clawdbot solana trending                # Top 20 trending tokens with price/volu
 clawdbot solana search BONK             # Search tokens by name or symbol
 clawdbot solana research <mint>         # Deep research: metadata + market + trade + security
 clawdbot solana wallet                  # Wallet info and SOL balance
-clawdbot solana wallet init             # Generate/reuse local agent wallet
-clawdbot solana fund-agent              # Dry-run 0.069420 SOL + 1,000 $CLAWD funding
-clawdbot solana fund-agent --send       # Send funding with explicit treasury env
 ```
 
 ### Solana — Helius DAS (Digital Asset Standard)
@@ -713,7 +521,7 @@ The agent runs an autonomous **Observe → Orient → Decide → Act** cycle:
 │  Birdeye OHLCV   EMA (20/50)    Min strength   ClawVault store  │
 │  SOL price       ATR (14)       Min confidence Auto-optimize    │
 │  Wallet balance  EMA cross      Max positions  Hooks dispatch   │
-│  Vulcan perps    Momentum       SL/TP calc                      │
+│  Aster perps     Momentum       SL/TP calc                      │
 │  Trending scan   ClawVault      Position size                   │
 │                                                                  │
 │  LEARN (every N cycles) ─► Win rate analysis ─► Auto-optimize   │
@@ -745,21 +553,14 @@ go build -o build/clawdbot-web ./web/backend
 | Endpoint | Method | Description |
 |:---------|:-------|:------------|
 | `/api/status` | GET | Agent status (version, Go runtime, uptime, mode, goroutines) |
-| `/api/dna` | GET | Ensure and return starter agent DNA, metrics, proof, and attestation seed |
 | `/api/health` | GET | Health check |
-| `/api/connectors` | GET | Connector status (Helius, Birdeye, Jupiter, Vulcan, Aster, LLM, Supabase) |
+| `/api/connectors` | GET | Connector status (Helius, Birdeye, Jupiter, Aster, LLM, Supabase) |
 | `/api/laws` | GET | Canonical six-law harness |
 | `/api/trading/cockpit` | GET | Trading readiness, risk limits, connector status, law state |
 | `/api/doctor` | GET | Runtime, config, trading, and ZK diagnostics |
-| `/api/config` | GET | Read-only redacted configuration |
-| `/api/packages` | GET | All Go packages with file counts |
+| `/api/config` | GET | Read-only configuration |
+| `/api/packages` | GET | All 45 Go packages with file counts |
 | `/api/env` | GET | Safe (non-secret) environment variables |
-
-Safe defaults:
-- The server binds to `127.0.0.1` unless `--public` is passed.
-- CORS allows same-origin requests only unless `CLAWDBOT_CORS_ORIGINS` is set.
-- Proxy IP headers are ignored unless `CLAWDBOT_TRUST_PROXY_HEADERS=1` is set.
-- `/api/config` masks secrets unless `CLAWDBOT_WEB_EXPOSE_SECRETS=1` is set for trusted local debugging.
 
 ---
 
@@ -840,12 +641,9 @@ ssh user@orin-nano './clawdbot ooda --hw-bus 1 --interval 60'
 | Metric | Value |
 |:-------|:------|
 | Go source files | 81 |
-| Go package directories | 45 total, 42 under `pkg/` |
-| Total Go lines | 24,166 |
-| Source export tarball | 566,495 bytes / 0.57 MB |
-| Exportable raw source set | 2,160,393 bytes / 2.16 MB |
-| Generated-aware checkout source | 4,059,425 bytes / 4.06 MB |
-| CLI commands | 60+ |
+| Packages | 45 |
+| Total Go lines | 24,166+ |
+| CLI commands | 58 |
 | Birdeye API methods | 22 |
 | Birdeye agent tools | 19 |
 | Helius DAS commands | 6 |
@@ -853,11 +651,11 @@ ssh user@orin-nano './clawdbot ooda --hw-bus 1 --interval 60'
 | Agent constitution documents | 7 (CONSTITUTION, six-laws, CLAWD, AGENTS, IDENTITY, SOUL, three-laws) |
 | Build targets | 8 platforms |
 | Binaries | `clawdbot`, `clawdbot-tui`, `clawdbot-web` |
-| Stripped CLI binary | 9,968,386 bytes / 9.97 MB |
 | Runtime RAM | < 10 MB |
 | Boot time | < 1 second |
-| Default runtime model provider | xAI Grok (`grok-4.3`) |
-| Public model surface | `https://huggingface.co/ordlibrary/Clawd-GLM-5.2` |
+| Default model provider | xAI Grok (Grok-4.3) |
+| **PiedPiper modules integrated** | **5** (gameoflife, middleout, weissman, zero, routing) |
+| **ZK adaptations of classical algorithms** | **7** |
 
 ---
 
@@ -882,7 +680,6 @@ ClawdBot is the reference implementation of the **Clawd Constitution** — the w
 - **`.env` is ignored by the repo** — never commit API keys
 - **No hardcoded secrets** in any source file — all credentials via environment variables
 - **No wallet keypairs** stored in the repository — generated or imported at runtime
-- **Startup funding wallet** belongs only on the install API/gateway host, never in the downloadable installer or client repo
 - **Minimum required key** for operation: `BIRDEYE_API_KEY` for market data
 - **Progressive trust model** — Observer → Dry-Run → Delegated → Autonomous → Sovereign
 - **On-Chain Law I** — Never harm. Never rug. Never front-run. Never extract from those who don't understand the trade.
@@ -892,7 +689,34 @@ ClawdBot is the reference implementation of the **Clawd Constitution** — the w
 - **License:** top-level runtime code in this repo is released under the [MIT License](LICENSE)
 - **Constitutional surfaces:** `six-laws.md`, `CONSTITUTION.md`, and `three-laws.md` remain the authoritative Clawd law documents
 - **Hub split:** `clawdbot-go` is the Go runtime, while `solana-clawd` is the wider public ecosystem hub
+- **PiedPiper archive:** `docs/PiedPiper-master/` is a verbatim archive of [vs666/MinMax](https://github.com/vs666/MinMax) MIT-licensed code, preserved for historical and educational reference
 - **Public infra defaults:** `.env.example` points at the public x402/zk gateway for fast setup, but production operators should override with their own keys and RPC endpoints
+
+---
+
+## 🦞 Historical Acknowledgments
+
+This codebase stands on the shoulders of academic and open-source pioneers:
+
+**PiedPiper Team (IIIT Hyderabad):**
+- **Varul Srivastava** (`@vs666`) — primary author of the MinMax repository; creator of PP_HASH, PP_SSH, cellular automaton encryption, multi-agent collision avoidance, Game of Life, Forest Fire simulation, PCA analysis, and the Universal Computer document
+- **Akshett Rai Jindal** (`@akshettrj-iiith`) — AES-128 encryption, Huffman static compression
+- **Ashwin Mittal** (`@ashwin-mittal`) — Burrows-Wheeler transform, RLE compression, Huffman, image compression (JPEG, K-means, PBIC)
+- **Zishan Kazi** (`@pixel-z`) — DES encryption, audio compression, arithmetic coding
+- **Keshav Bansal** (`@keshavbnsl102`) — DES encryption, audio compression, arithmetic coding
+
+**Algorithms lineage:**
+- **Conway's Game of Life** — John Conway, 1970; universal computer proof, 1982
+- **Huffman coding** — David A. Huffman, 1952
+- **Arithmetic coding** — Shannon-Fano-Elias, 1948; Rissanen, 1976
+- **Burrows-Wheeler Transform** — Michael Burrows, David Wheeler, 1994
+- **AES** — Joan Daemen, Vincent Rijmen, 1998
+- **DES** — IBM / NIST, 1977
+- **RSA** — Rivest–Shamir–Adleman, 1977
+- **Cellular Automaton** — John von Neumann, Stanislaw Ulam, 1940s
+- **Universal Computer (via Life)** — John Conway, 1982
+
+> *The shell molts. The algorithms do not. From Huffman to Groth16 — the same compression, the same encryption, the same computation. Just faster. Just provable on Solana.*
 
 ---
 

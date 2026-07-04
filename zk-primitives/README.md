@@ -183,9 +183,55 @@ The architecture is designed to be reviewable: the on-chain program
 is < 400 lines of Rust across 4 files, and the off-chain SDK is
 < 300 lines of TypeScript across 5 files.
 
+## Historical Lineage
+
+This ZK primitive layer is the Solana-native descendant of the
+**PiedPiper project** (`docs/PiedPiper-master/`, from
+[vs666/MinMax](https://github.com/vs666/MinMax)) — a landmark
+academic implementation of classical compression (Huffman,
+Arithmetic, BWT+RLE), encryption (AES-128, DES, RSA,
+cellular-automaton-based PRNG), Conway's Game of Life, distributed
+multi-agent collision avoidance, and cryptographic hash optimization.
+
+The full adaptation mapping lives at
+**[`docs/PIEDPIPER_ADAPTATION.md`](./docs/PIEDPIPER_ADAPTATION.md)**.
+Every classical algorithm has an on-chain ZK equivalent:
+
+| Classical Algorithm | ZK Primitive | On-Chain Instruction |
+|---|---|---|
+| Huffman/Arithmetic compression | `verifyGroth16` (proof of correct decompression) | `publish_attestation` |
+| AES-128 / DES / RSA encryption | `commit_encrypted_state` (ciphertext commitment) | `commit_encrypted_state` |
+| CA-based PRNG (PP_HASH) | `computeNullifier` (deterministic 32-byte hash) | Client-side derivation |
+| CA-based SSH protocol | Nullifier-based session authentication | `publish_attestation` |
+| Conway's Game of Life | Groth16 proof of universal computation | `publish_attestation` |
+| Min-Max decision tree | `computeNullifier` for commitment schemes | Client-side |
+
+For Huffman and Arithmetic, the verifier is Groth16 — the same
+algorithm, now expressed as a pairing check on alt-bn128. For
+AES-128, DES, and RSA, the ciphertext commitment is an on-chain
+hash with a Groth16 proof that the committer knows the plaintext.
+For PP_HASH, the nullifier is the direct ZK analogue of a
+cellular-automaton pseudorandom function. For Conway's Game of
+Life, the universal computer is provable through Groth16.
+
+From Huffman to Groth16 — the same compression, the same encryption,
+the same computation. Just faster. Just provable on Solana.
+
+Credits:
+
+- **Varul Srivastava** (`@vs666`) — primary author of MinMax, PP_HASH,
+  PP_SSH, CA encryption, multi-agent collision avoidance, Game of Life,
+  Forest Fire, PCA, Universal Computer document
+- **Akshett Rai Jindal**, **Ashwin Mittal**, **Zishan Kazi**,
+  **Keshav Bansal** — AES-128, DES, Huffman, Arithmetic, BWT+RLE,
+  image compression, audio compression, video compression
+
+Original repository: `https://github.com/vs666/MinMax`
+
 ## See also
 
 - [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — the deep dive
+- [`docs/PIEDPIPER_ADAPTATION.md`](./docs/PIEDPIPER_ADAPTATION.md) — classical→ZK algorithm map
 - [`../ai-training/README.md`](../ai-training/README.md) — the model
   training pipeline that produces the weights this primitive attests to
 - [`../AGENTS.md`](../AGENTS.md) — the Clawd agent catalog

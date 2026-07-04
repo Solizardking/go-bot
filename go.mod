@@ -5,6 +5,7 @@ go 1.26.4
 require (
 	github.com/gagliardetto/solana-go v1.19.0
 	github.com/gdamore/tcell/v2 v2.13.8
+	github.com/klauspost/compress v1.18.0
 	github.com/mr-tron/base58 v1.2.0
 	github.com/rivo/tview v0.42.0
 	github.com/spf13/cobra v1.10.2
@@ -22,7 +23,6 @@ require (
 	github.com/goccy/go-json v0.10.6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect

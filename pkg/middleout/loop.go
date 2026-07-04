@@ -189,5 +189,3 @@ func SizeRoute(name string, maxBytes int) Route {
 		},
 	}
 }
-
-func routeString(r LoopResult) string { return fmt.Sprintf("%s@%d", r.Reason, r.Iterations) }

@@ -30,3 +30,6 @@ zk-primitives/**/node_modules/
 zk-primitives/**/.env
 zk-primitives/**/.env.local
 zk-primitives/**/dist/
+
+# compiled web backend artifact
+/backend

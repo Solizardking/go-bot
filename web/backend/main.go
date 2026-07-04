@@ -35,11 +35,14 @@ import (
 	"github.com/8bitlabs/clawdbot/pkg/config"
 	dnaPkg "github.com/8bitlabs/clawdbot/pkg/dna"
 	"github.com/8bitlabs/clawdbot/pkg/doctor"
+	"github.com/8bitlabs/clawdbot/pkg/gameoflife"
 	"github.com/8bitlabs/clawdbot/pkg/laws"
+	"github.com/8bitlabs/clawdbot/pkg/middleout"
 	"github.com/8bitlabs/clawdbot/pkg/solana"
 	"github.com/8bitlabs/clawdbot/pkg/strategy"
 	"github.com/8bitlabs/clawdbot/pkg/trading"
 	"github.com/8bitlabs/clawdbot/pkg/wallet"
+	"github.com/8bitlabs/clawdbot/pkg/weissman"
 )
 
 const banner = `

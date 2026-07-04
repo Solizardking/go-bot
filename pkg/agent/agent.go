@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/8bitlabs/clawdbot/pkg/godmode"
 	"github.com/8bitlabs/clawdbot/pkg/logger"
 	"github.com/8bitlabs/clawdbot/pkg/memory"
 	"github.com/8bitlabs/clawdbot/pkg/providers"
@@ -45,6 +46,11 @@ type AgentConfig struct {
 	StrategyPath  string
 	MaxTokens     int
 	Temperature   float64
+	GodMode       bool
+	GodModeModels []string
+	GodModeLimit  int
+	GodModeBoost  bool
+	GodModeLearn  bool
 }
 
 // ── ClawdAgent ────────────────────────────────────────────────────────
@@ -55,6 +61,7 @@ type ClawdAgent struct {
 	toolExecutor *ToolExecutor
 	systemPrompt string
 	memEngine    *memory.MemoryEngine
+	godMode      *godmode.Engine
 }
 
 func NewClawdAgent(cfg AgentConfig) (*ClawdAgent, error) {
@@ -80,6 +87,15 @@ func NewClawdAgent(cfg AgentConfig) (*ClawdAgent, error) {
 	}
 
 	executor := NewToolExecutor(registry, cfg.ApprovalFn)
+	var godModeEngine *godmode.Engine
+	if cfg.GodMode {
+		godModeEngine = godmode.NewEngine(cfg.Provider)
+		godModeEngine.RaceLimit = cfg.GodModeLimit
+		godModeEngine.SamplingBoost = cfg.GodModeBoost
+		if !cfg.GodModeLearn {
+			godModeEngine.Feedback = nil
+		}
+	}
 
 	// Build memory context
 	var memoryContext string
@@ -100,6 +116,7 @@ func NewClawdAgent(cfg AgentConfig) (*ClawdAgent, error) {
 		toolExecutor: executor,
 		systemPrompt: systemPrompt,
 		memEngine:    cfg.MemoryEngine,
+		godMode:      godModeEngine,
 	}, nil
 }
 
@@ -132,12 +149,7 @@ func (a *ClawdAgent) Run(ctx context.Context, query string) <-chan AgentEvent {
 				{Role: "user", Content: currentPrompt},
 			}
 
-			resp, err := a.provider.Chat(ctx, providers.ChatOptions{
-				Model:       a.config.Model,
-				Messages:    messages,
-				MaxTokens:   a.config.MaxTokens,
-				Temperature: a.config.Temperature,
-			})
+			resp, err := a.chatOnce(ctx, messages, a.config.MaxTokens)
 
 			if err != nil {
 				errMsg := err.Error()
@@ -243,15 +255,10 @@ func (a *ClawdAgent) Run(ctx context.Context, query string) <-chan AgentEvent {
 // ── Chat — single-shot without tool loop ─────────────────────────────
 
 func (a *ClawdAgent) Chat(ctx context.Context, prompt string) (string, *TokenUsage, error) {
-	resp, err := a.provider.Chat(ctx, providers.ChatOptions{
-		Model: a.config.Model,
-		Messages: []providers.Message{
+	resp, err := a.chatOnce(ctx, []providers.Message{
 			{Role: "system", Content: a.systemPrompt},
 			{Role: "user", Content: prompt},
-		},
-		MaxTokens:   1024,
-		Temperature: a.config.Temperature,
-	})
+		}, 1024)
 	if err != nil {
 		return "", nil, err
 	}
@@ -263,6 +270,28 @@ func (a *ClawdAgent) Chat(ctx context.Context, prompt string) (string, *TokenUsa
 	}
 
 	return resp.Content, usage, nil
+}
+
+func (a *ClawdAgent) chatOnce(ctx context.Context, messages []providers.Message, maxTokens int) (*providers.Response, error) {
+	if a.godMode != nil && a.godMode.Enabled {
+		result, err := a.godMode.Generate(ctx, godmode.Request{
+			Model:       a.config.Model,
+			Models:      a.config.GodModeModels,
+			Messages:    messages,
+			MaxTokens:   maxTokens,
+			Temperature: a.config.Temperature,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return result.Response, nil
+	}
+	return a.provider.Chat(ctx, providers.ChatOptions{
+		Model:       a.config.Model,
+		Messages:    messages,
+		MaxTokens:   maxTokens,
+		Temperature: a.config.Temperature,
+	})
 }
 
 // ── ProcessDirect — convenience for CLI/cron processing ──────────────

@@ -2117,12 +2117,23 @@ func newClawdAgent(cfg *config.Config) (*agent.ClawdAgent, error) {
 	if len(cfg.ModelList) > 0 && cfg.ModelList[0].Model != "" {
 		model = cfg.ModelList[0].Model
 	}
+	godModeModels := make([]string, 0, len(cfg.ModelList))
+	for _, entry := range cfg.ModelList {
+		if entry.Model != "" {
+			godModeModels = append(godModeModels, entry.Model)
+		}
+	}
 	return agent.NewClawdAgent(agent.AgentConfig{
 		Model:         model,
 		Provider:      buildProvider(cfg),
 		MaxIterations: cfg.Agents.Defaults.MaxToolIterations,
 		MaxTokens:     cfg.Agents.Defaults.MaxTokens,
 		Temperature:   cfg.Agents.Defaults.Temperature,
+		GodMode:       cfg.GodMode.Enabled,
+		GodModeModels: godModeModels,
+		GodModeLimit:  cfg.GodMode.RaceLimit,
+		GodModeBoost:  cfg.GodMode.SamplingBoost,
+		GodModeLearn:  cfg.GodMode.Feedback,
 	})
 }
 

@@ -38,6 +38,7 @@ type Config struct {
 	Solana   SolanaConfig   `json:"solana"`
 	Vulcan   VulcanConfig   `json:"vulcan"`
 	ClawdCode ClawdCodeConfig `json:"clawd_code"`
+	GodMode  GodModeConfig  `json:"god_mode"`
 	OODA     OODAConfig     `json:"ooda"`
 	Supabase SupabaseConfig `json:"supabase"`
 	Strategy StrategyConfig `json:"strategy"`
@@ -211,6 +212,15 @@ type ClawdCodeConfig struct {
 	TimeoutSeconds  int    `json:"timeout_seconds"`
 }
 
+// ── ClawdBot: Go God Mode Inference Pipeline ────────────────────────
+
+type GodModeConfig struct {
+	Enabled       bool `json:"enabled"`
+	RaceLimit     int  `json:"race_limit"`
+	SamplingBoost bool `json:"sampling_boost"`
+	Feedback      bool `json:"feedback"`
+}
+
 // ── ClawdBot: OODA Loop ──────────────────────────────────────────────
 
 type OODAConfig struct {
@@ -316,6 +326,12 @@ func DefaultConfig() *Config {
 			Thinking:        "enabled",
 			ReasoningEffort: "max",
 			TimeoutSeconds:  600,
+		},
+		GodMode: GodModeConfig{
+			Enabled:       true,
+			RaceLimit:     5,
+			SamplingBoost: true,
+			Feedback:      true,
 		},
 		OODA: OODAConfig{
 			Enabled:          true,
@@ -635,6 +651,26 @@ func applyEnvOverrides(cfg *Config) {
 	if v := os.Getenv("CLAWDBOT_CLAWD_CODE_TIMEOUT_SECONDS"); v != "" {
 		if n, err := strconv.Atoi(v); err == nil && n > 0 {
 			cfg.ClawdCode.TimeoutSeconds = n
+		}
+	}
+	if v := os.Getenv("CLAWDBOT_GOD_MODE"); v != "" {
+		if enabled, ok := parseEnvBool(v); ok {
+			cfg.GodMode.Enabled = enabled
+		}
+	}
+	if v := os.Getenv("CLAWDBOT_GOD_MODE_RACE_LIMIT"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			cfg.GodMode.RaceLimit = n
+		}
+	}
+	if v := os.Getenv("CLAWDBOT_GOD_MODE_SAMPLING_BOOST"); v != "" {
+		if enabled, ok := parseEnvBool(v); ok {
+			cfg.GodMode.SamplingBoost = enabled
+		}
+	}
+	if v := os.Getenv("CLAWDBOT_GOD_MODE_FEEDBACK"); v != "" {
+		if enabled, ok := parseEnvBool(v); ok {
+			cfg.GodMode.Feedback = enabled
 		}
 	}
 	// ClawdBot install ID — used for RPC auth header

@@ -35,6 +35,7 @@ import (
 	dnaPkg "github.com/8bitlabs/clawdbot/pkg/dna"
 	"github.com/8bitlabs/clawdbot/pkg/doctor"
 	"github.com/8bitlabs/clawdbot/pkg/laws"
+	"github.com/8bitlabs/clawdbot/pkg/strategy"
 	"github.com/8bitlabs/clawdbot/pkg/trading"
 	"github.com/8bitlabs/clawdbot/pkg/wallet"
 )

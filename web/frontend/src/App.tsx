@@ -180,6 +180,8 @@ export default function App() {
   const [cockpit, setCockpit] = useState<CockpitInfo | null>(null)
   const [signal, setSignal] = useState<SignalInfo | null>(null)
   const [backtest, setBacktest] = useState<BacktestInfo | null>(null)
+  const [prices, setPrices] = useState<PricesInfo | null>(null)
+  const [perps, setPerps] = useState<PerpsInfo | null>(null)
   const [dnaInfo, setDNAInfo] = useState<DNAInfo | null>(null)
   const [configText, setConfigText] = useState<string>('')
   const [showConfig, setShowConfig] = useState(false)
@@ -197,6 +199,8 @@ export default function App() {
       fetch('/api/trading/cockpit').then(r => r.json()).then(setCockpit).catch(() => {})
       fetch('/api/trading/signal').then(r => r.json()).then(setSignal).catch(() => {})
       fetch('/api/trading/backtest').then(r => r.json()).then(setBacktest).catch(() => {})
+      fetch('/api/market/prices').then(r => r.json()).then(setPrices).catch(() => {})
+      fetch('/api/market/perps').then(r => r.json()).then(setPerps).catch(() => {})
       fetch('/api/dna').then(r => r.json()).then(setDNAInfo).catch(() => {})
     }
     fetchAll()
@@ -363,6 +367,67 @@ export default function App() {
             </>
           ) : (
             <div style={{color:'var(--text-dim)'}}>Running strategy engine...</div>
+          )}
+        </div>
+
+        {/* Live Market Panel — key-less Jupiter prices */}
+        <div className="panel">
+          <h2>Live Market {prices?.ok && <span style={{fontSize:'0.6rem',color:'var(--solana-green, #14F195)'}}>● LIVE</span>}</h2>
+          {prices ? (
+            prices.ok ? (
+              <div className="env-list">
+                {Object.values(prices.prices).map(p => (
+                  <div key={p.mint} className="env-row">
+                    <span className="env-key" style={{fontFamily:'monospace'}}>{p.mint.slice(0, 4)}…{p.mint.slice(-4)}</span>
+                    <span className="env-val">
+                      ${p.usdPrice < 0.01 ? p.usdPrice.toExponential(2) : p.usdPrice.toFixed(4)}
+                      <span style={{marginLeft:'8px',color: p.priceChange24h >= 0 ? 'var(--solana-green, #14F195)' : '#ff5d6c'}}>
+                        {p.priceChange24h >= 0 ? '▲' : '▼'} {Math.abs(p.priceChange24h).toFixed(2)}%
+                      </span>
+                    </span>
+                  </div>
+                ))}
+                <div className="label" style={{marginTop:'8px'}}>source: {prices.source} · {prices.count} tokens</div>
+              </div>
+            ) : (
+              <div style={{color:'#ff9f45',fontSize:'0.8rem'}}>live prices unavailable: {prices.error}</div>
+            )
+          ) : (
+            <div style={{color:'var(--text-dim)'}}>Loading live prices...</div>
+          )}
+        </div>
+
+        {/* Perps Panel — Birdeye hyperliquid open interest */}
+        <div className="panel">
+          <h2>Perps Open Interest</h2>
+          {perps ? (
+            perps.ok && perps.tokens && perps.tokens.length > 0 ? (
+              <div>
+                {perps.tokens.slice(0, 8).map(t => {
+                  const total = t.long_io + t.short_io || 1
+                  const longPct = (t.long_io / total) * 100
+                  return (
+                    <div key={t.token} style={{marginBottom:'8px'}}>
+                      <div style={{display:'flex',justifyContent:'space-between',fontSize:'0.8rem'}}>
+                        <span>{t.token}</span>
+                        <span style={{color:'var(--text-dim)'}}>${(t.open_interest/1e6).toFixed(1)}M · {t.bias_text}</span>
+                      </div>
+                      <div style={{height:'6px',borderRadius:'3px',overflow:'hidden',display:'flex',marginTop:'3px'}}>
+                        <div style={{width:`${longPct}%`,background:'var(--solana-green, #14F195)'}} />
+                        <div style={{width:`${100-longPct}%`,background:'#ff5d6c'}} />
+                      </div>
+                    </div>
+                  )
+                })}
+                <div className="label" style={{marginTop:'6px'}}>source: {perps.source}</div>
+              </div>
+            ) : (
+              <div style={{color:'#ff9f45',fontSize:'0.8rem'}}>
+                perps feed unavailable{perps.error ? `: ${perps.error}` : ''}
+              </div>
+            )
+          ) : (
+            <div style={{color:'var(--text-dim)'}}>Loading perps...</div>
           )}
         </div>
 

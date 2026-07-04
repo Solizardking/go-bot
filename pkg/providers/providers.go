@@ -47,11 +47,16 @@ type LLMProvider interface {
 }
 
 type ChatOptions struct {
-	Model       string    `json:"model"`
-	Messages    []Message `json:"messages"`
-	MaxTokens   int       `json:"max_tokens"`
-	Temperature float64   `json:"temperature"`
-	Tools       []ToolDef `json:"tools,omitempty"`
+	Model             string    `json:"model"`
+	Messages          []Message `json:"messages"`
+	MaxTokens         int       `json:"max_tokens"`
+	Temperature       float64   `json:"temperature"`
+	TopP              float64   `json:"top_p,omitempty"`
+	TopK              int       `json:"top_k,omitempty"`
+	FrequencyPenalty  float64   `json:"frequency_penalty,omitempty"`
+	PresencePenalty   float64   `json:"presence_penalty,omitempty"`
+	RepetitionPenalty float64   `json:"repetition_penalty,omitempty"`
+	Tools             []ToolDef `json:"tools,omitempty"`
 }
 
 type ToolDef struct {
@@ -107,6 +112,21 @@ func (p *OpenRouterProvider) Chat(ctx context.Context, opts ChatOptions) (*Respo
 		"messages":    messages,
 		"max_tokens":  opts.MaxTokens,
 		"temperature": opts.Temperature,
+	}
+	if opts.TopP > 0 {
+		payload["top_p"] = opts.TopP
+	}
+	if opts.TopK > 0 {
+		payload["top_k"] = opts.TopK
+	}
+	if opts.FrequencyPenalty != 0 {
+		payload["frequency_penalty"] = opts.FrequencyPenalty
+	}
+	if opts.PresencePenalty != 0 {
+		payload["presence_penalty"] = opts.PresencePenalty
+	}
+	if opts.RepetitionPenalty > 0 && opts.RepetitionPenalty != 1 {
+		payload["repetition_penalty"] = opts.RepetitionPenalty
 	}
 
 	body, err := json.Marshal(payload)

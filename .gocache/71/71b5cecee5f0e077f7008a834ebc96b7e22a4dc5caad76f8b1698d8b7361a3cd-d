@@ -1,0 +1,8 @@
+./agent.go
+./channels.go
+./hooks.go
+./ooda.go
+./prompts.go
+./scratchpad.go
+./toolexec.go
+./godmode_test.go

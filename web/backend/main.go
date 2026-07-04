@@ -451,24 +451,41 @@ func portfolioLimitsFromConfig(cfg *config.Config) trading.PortfolioLimits {
 	}
 }
 
-// demoSeries returns a deterministic sine-wave price series so the signal
-// endpoint has something to evaluate without live market data.
+// demoClose is the shared price model: an upward drift with two overlaid cycles
+// and deterministic pseudo-random noise. The noise is what makes RSI oscillate
+// through the oversold/overbought bands and EMAs cross, so the strategy's
+// triple-confirmation entries actually fire — a smooth sine never triggers them.
+func demoClose(i int) float64 {
+	drift := 0.08 * float64(i)
+	cycle := 12*math.Sin(float64(i)/9.0) + 5*math.Sin(float64(i)/3.5)
+	// Deterministic LCG noise in roughly [-4, 4].
+	seed := uint64(i)*2862933555777941757 + 3037000493
+	noise := (float64(seed>>33)/float64(1<<31))*8 - 4
+	price := 100 + drift + cycle + noise
+	if price < 1 {
+		price = 1
+	}
+	return price
+}
+
+// demoSeries returns a deterministic price series so the signal endpoint has
+// something to evaluate without live market data.
 func demoSeries() (closes, highs, lows []float64) {
-	closes = make([]float64, 120)
+	closes = make([]float64, 160)
 	for i := range closes {
-		closes[i] = 100 + 15*math.Sin(float64(i)/6.0) + 0.05*float64(i)
+		closes[i] = demoClose(i)
 	}
 	highs, lows = deriveHighsLows(closes)
 	return closes, highs, lows
 }
 
-// deriveHighsLows synthesizes a ±2% intrabar range around each close.
+// deriveHighsLows synthesizes a ±1.5% intrabar range around each close.
 func deriveHighsLows(closes []float64) (highs, lows []float64) {
 	highs = make([]float64, len(closes))
 	lows = make([]float64, len(closes))
 	for i, c := range closes {
-		highs[i] = c * 1.02
-		lows[i] = c * 0.98
+		highs[i] = c * 1.015
+		lows[i] = c * 0.985
 	}
 	return highs, lows
 }
@@ -477,8 +494,8 @@ func deriveHighsLows(closes []float64) (highs, lows []float64) {
 func demoBars(n int) []strategy.Bar {
 	bars := make([]strategy.Bar, n)
 	for i := range bars {
-		base := 100 + 15*math.Sin(float64(i)/6.0) + 0.05*float64(i)
-		bars[i] = strategy.Bar{Close: base, High: base * 1.02, Low: base * 0.98}
+		c := demoClose(i)
+		bars[i] = strategy.Bar{Close: c, High: c * 1.015, Low: c * 0.985}
 	}
 	return bars
 }
